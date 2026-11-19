@@ -11,3 +11,30 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// Which signup path a row belongs to. One person on both lists is two rows
+// (see the @@unique below); a double-submit on one path is absorbed via ON CONFLICT.
+enum Segment {
+  launch_waitlist
+  beta_tester
+}
+
+// System-of-record for every signup. The row is durable the instant it commits
+// here; HubSpot sync is a downstream, idempotent target stamped onto synced_at
+// by later work (#3), never a dependency of user-visible success.
+model Signup {
+  id           String    @id @default(uuid())
+  email        String
+  segment      Segment
+  createdAt    DateTime  @default(now()) @map("created_at")
+  // Attribution placeholder; #7 persists captured UTM params here.
+  source       String?
+  consentAt    DateTime? @map("consent_at")
+  // Null until the HubSpot sync (#3) succeeds; sync_attempts tracks retries.
+  syncedAt     DateTime? @map("synced_at")
+  syncAttempts Int       @default(0) @map("sync_attempts")
+
+  // Per-segment natural key: makes a double-submit idempotent and dedup local.
+  @@unique([email, segment])
+  @@map("signup")
+}
