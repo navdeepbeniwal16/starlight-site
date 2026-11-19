@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { testFlightUrl } from "@/lib/signup/config";
 import { isValidEmail, normalizeEmail } from "@/lib/signup/email";
 import { parseSegment } from "@/lib/signup/segment";
+import { SIGNUP_STATUS } from "@/lib/signup/status";
 
 // 303 forces the browser to GET the destination after the POST (Post/Redirect/Get),
 // and is the exact status the beta path owes its acceptance criteria.
@@ -27,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
   const rawEmail = String(form.get("email") ?? "");
   if (!isValidEmail(rawEmail)) {
     // No row is written; the page renders an inline error from ?status.
-    return redirect("/?status=invalid", request.url);
+    return redirect(`/?status=${SIGNUP_STATUS.invalid}`, request.url);
   }
 
   const source = form.get("source");
@@ -48,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
     created = count === 1;
   } catch (error) {
     console.error("signup write failed", error);
-    return redirect("/?status=error", request.url);
+    return redirect(`/?status=${SIGNUP_STATUS.error}`, request.url);
   }
 
   // Beta is durable now; send the browser to TestFlight whether this was the first
@@ -57,5 +58,8 @@ export async function POST(request: Request): Promise<Response> {
     return redirect(testFlightUrl(), request.url);
   }
 
-  return redirect(created ? "/?status=joined" : "/?status=already", request.url);
+  return redirect(
+    `/?status=${created ? SIGNUP_STATUS.joined : SIGNUP_STATUS.already}`,
+    request.url,
+  );
 }

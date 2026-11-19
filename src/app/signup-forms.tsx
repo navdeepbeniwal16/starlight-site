@@ -7,39 +7,50 @@ import { Segment } from "@/generated/prisma/enums";
 export function SignupForms() {
   return (
     <div className="flex w-full flex-col gap-8 border-t border-black/10 pt-8 text-left dark:border-white/15">
-      <form method="post" action="/api/signup" className="flex flex-col gap-2">
-        <input type="hidden" name="segment" value={Segment.launch_waitlist} />
-        <label htmlFor="waitlist-email">Notify me at launch</label>
-        <input
-          id="waitlist-email"
-          type="email"
-          name="email"
-          autoComplete="email"
-          required
-          placeholder="you@example.com"
-          className="border px-2 py-1"
-        />
-        <button type="submit" className="border px-2 py-1">
-          Join the launch waitlist
-        </button>
-      </form>
-
-      <form method="post" action="/api/signup" className="flex flex-col gap-2">
-        <input type="hidden" name="segment" value={Segment.beta_tester} />
-        <label htmlFor="beta-email">Get the iOS beta — 6 months free</label>
-        <input
-          id="beta-email"
-          type="email"
-          name="email"
-          autoComplete="email"
-          required
-          placeholder="you@example.com"
-          className="border px-2 py-1"
-        />
-        <button type="submit" className="border px-2 py-1">
-          Join the beta
-        </button>
-      </form>
+      <SignupForm
+        id="waitlist"
+        segment={Segment.launch_waitlist}
+        label="Notify me at launch"
+        cta="Join the launch waitlist"
+      />
+      <SignupForm
+        id="beta"
+        segment={Segment.beta_tester}
+        label="Get the iOS beta — 6 months free"
+        cta="Join the beta"
+      />
     </div>
+  );
+}
+
+function SignupForm({
+  id,
+  segment,
+  label,
+  cta,
+}: {
+  id: string;
+  segment: Segment;
+  label: string;
+  cta: string;
+}) {
+  const emailId = `${id}-email`;
+  return (
+    <form method="post" action="/api/signup" className="flex flex-col gap-2">
+      <input type="hidden" name="segment" value={segment} />
+      <label htmlFor={emailId}>{label}</label>
+      <input
+        id={emailId}
+        type="email"
+        name="email"
+        autoComplete="email"
+        required
+        placeholder="you@example.com"
+        className="border px-2 py-1"
+      />
+      <button type="submit" className="border px-2 py-1">
+        {cta}
+      </button>
+    </form>
   );
 }

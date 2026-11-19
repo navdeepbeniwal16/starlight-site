@@ -1,17 +1,28 @@
+import { type SignupStatus, SIGNUP_STATUS } from "@/lib/signup/status";
+
 // Inline feedback for the Post/Redirect/Get flow: the route handler redirects
 // back to `/?status=...` for the launch path, and the beta path leaves via 303 to
 // TestFlight so it never lands here.
-const STATUS_MESSAGES: Record<string, { tone: "success" | "error"; text: string }> = {
-  joined: {
+const STATUS_MESSAGES: Record<
+  SignupStatus,
+  { tone: "success" | "error"; text: string }
+> = {
+  [SIGNUP_STATUS.joined]: {
     tone: "success",
     text: "You're on the list — we'll email you at launch.",
   },
-  already: { tone: "success", text: "You're already on the list." },
-  invalid: {
+  [SIGNUP_STATUS.already]: {
+    tone: "success",
+    text: "You're already on the list.",
+  },
+  [SIGNUP_STATUS.invalid]: {
     tone: "error",
     text: "That email doesn't look right. Please check it and try again.",
   },
-  error: { tone: "error", text: "Something went wrong. Please try again." },
+  [SIGNUP_STATUS.error]: {
+    tone: "error",
+    text: "Something went wrong. Please try again.",
+  },
 };
 
 export async function SignupStatus({
@@ -20,8 +31,11 @@ export async function SignupStatus({
   searchParams: PageProps<"/">["searchParams"];
 }) {
   const params = (await searchParams) ?? {};
-  const status = typeof params.status === "string" ? params.status : undefined;
-  const message = status ? STATUS_MESSAGES[status] : undefined;
+  const status = params.status;
+  const message =
+    typeof status === "string" && status in STATUS_MESSAGES
+      ? STATUS_MESSAGES[status as SignupStatus]
+      : undefined;
   if (!message) return null;
 
   return (
