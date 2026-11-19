@@ -87,4 +87,16 @@ describe("POST /api/signup", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].email).toBe("beta@example.com");
   });
+
+  it("stays idempotent on a repeat beta submit: one row, still 303 to TestFlight", async () => {
+    await submit({ email: "beta@example.com", segment: "beta_tester" });
+    const res = await submit({
+      email: "beta@example.com",
+      segment: "beta_tester",
+    });
+
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe(process.env.TESTFLIGHT_URL);
+    expect(await prisma.signup.count()).toBe(1);
+  });
 });
