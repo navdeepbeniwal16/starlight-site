@@ -6,6 +6,8 @@ import { PrismaClient } from "@/generated/prisma/client";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient(): PrismaClient {
+  // Runtime queries go through the pooled DATABASE_URL; migrations use the direct
+  // connection (DIRECT_URL) via prisma7.config.ts. See the README runbook.
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
   return new PrismaClient({ adapter });
 }

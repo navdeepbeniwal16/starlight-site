@@ -10,6 +10,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Connection URLs live outside the schema: the pooled DATABASE_URL reaches the
+  // runtime through the driver adapter (src/lib/db.ts), and the direct DIRECT_URL
+  // reaches migrations through prisma7.config.ts.
 }
 
 enum Segment {

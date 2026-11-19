@@ -9,6 +9,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations issue DDL, which a connection pooler can't carry, so they run on
+    // the direct (unpooled) connection. Falls back to DATABASE_URL where one
+    // direct connection serves both roles (local dev, CI, throwaway Postgres).
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
