@@ -50,6 +50,36 @@ jobs:
       - run: npm ci
       - run: npm run test
 
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: starlight_test
+        ports:
+          - 5432:5432
+        # Gate the job's steps on the container being ready to accept connections.
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/starlight_test?schema=public
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # `prisma migrate deploy` runs on boot from the integration lane's global
+      # setup; each test truncates for isolation.
+      - run: npm run test:integration
+
   e2e:
     runs-on: ubuntu-latest
     steps:
