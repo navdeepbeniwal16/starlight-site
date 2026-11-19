@@ -3,9 +3,17 @@ import { describe, expect, it } from "vitest";
 import Home from "./page";
 import { siteConfig } from "@/lib/site";
 
+// The async SignupStatus suspends under jsdom (no server), so only the static
+// shell renders here — enough to assert the hero content.
+function renderHome() {
+  return render(
+    <Home params={Promise.resolve({})} searchParams={Promise.resolve({})} />,
+  );
+}
+
 describe("Home placeholder page", () => {
   it("renders the tagline as the page heading", () => {
-    render(<Home />);
+    renderHome();
 
     expect(
       screen.getByRole("heading", { name: siteConfig.tagline }),
@@ -13,7 +21,7 @@ describe("Home placeholder page", () => {
   });
 
   it("surfaces the brand name and waitlist status", () => {
-    render(<Home />);
+    renderHome();
 
     expect(screen.getByText(siteConfig.name)).toBeInTheDocument();
     expect(screen.getByText(siteConfig.waitlistStatus)).toBeInTheDocument();

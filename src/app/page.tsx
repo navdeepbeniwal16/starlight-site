@@ -1,6 +1,9 @@
+import { Suspense } from "react";
 import { siteConfig } from "@/lib/site";
+import { SignupForms } from "./signup-forms";
+import { SignupStatus } from "./signup-status";
 
-export default function Home() {
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-24">
       <div className="flex max-w-xl flex-col items-center gap-6 text-center">
@@ -16,6 +19,12 @@ export default function Home() {
         <p className="text-sm font-medium text-zinc-500 dark:text-zinc-500">
           {siteConfig.waitlistStatus}
         </p>
+        {/* Streams in at request time so the static shell still prerenders
+            under Cache Components (searchParams is a runtime API). */}
+        <Suspense fallback={null}>
+          <SignupStatus searchParams={searchParams} />
+        </Suspense>
+        <SignupForms />
       </div>
     </main>
   );
