@@ -13,7 +13,7 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
-    // Integration tests need Postgres and run in their own node lane.
+    // Integration tests run in their own lane (vitest.integration.config.mts).
     exclude: [...configDefaults.exclude, "**/*.integration.test.ts"],
   },
 });

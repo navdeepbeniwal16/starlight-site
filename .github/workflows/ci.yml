@@ -61,7 +61,6 @@ jobs:
           POSTGRES_DB: starlight_test
         ports:
           - 5432:5432
-        # Gate the job's steps on the container being ready to accept connections.
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -76,8 +75,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # `prisma migrate deploy` runs on boot from the integration lane's global
-      # setup; each test truncates for isolation.
+      # Migrations run on boot from the integration lane's global setup.
       - run: npm run test:integration
 
   e2e:

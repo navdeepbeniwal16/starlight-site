@@ -1,8 +1,8 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
-// Reuse a single client across dev HMR reloads so we don't exhaust Postgres
-// connections; in production each serverless instance gets its own.
+// Dev HMR re-imports this module on every edit; cache the client on globalThis
+// or each reload leaks another Postgres connection pool.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient(): PrismaClient {

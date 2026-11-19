@@ -19,8 +19,8 @@ export default function Home({ searchParams }: PageProps<"/">) {
         <p className="text-sm font-medium text-zinc-500 dark:text-zinc-500">
           {siteConfig.waitlistStatus}
         </p>
-        {/* Streams in at request time so the static shell still prerenders
-            under Cache Components (searchParams is a runtime API). */}
+        {/* searchParams is a runtime API; Cache Components requires the read to
+            sit inside a Suspense boundary. */}
         <Suspense fallback={null}>
           <SignupStatus searchParams={searchParams} />
         </Suspense>

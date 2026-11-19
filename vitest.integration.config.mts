@@ -1,10 +1,9 @@
 import { defineConfig } from "vitest/config";
 
-// Integration lane: the signup route handler exercised against a real (ephemeral)
-// Postgres. Kept separate from the jsdom unit config so `npm test` stays DB-free.
+// The signup route handler against an ephemeral Postgres; kept out of the DB-free
+// unit lane.
 export default defineConfig({
   resolve: {
-    // Resolves the "@/*" tsconfig path alias (native in Vite 8+).
     tsconfigPaths: true,
   },
   test: {

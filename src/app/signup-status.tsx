@@ -1,8 +1,6 @@
 import { type SignupStatus, SIGNUP_STATUS } from "@/lib/signup/status";
 
-// Inline feedback for the Post/Redirect/Get flow: the route handler redirects
-// back to `/?status=...` for the launch path, and the beta path leaves via 303 to
-// TestFlight so it never lands here.
+// Only the launch path renders here; the beta path 303s away to TestFlight.
 const STATUS_MESSAGES: Record<
   SignupStatus,
   { tone: "success" | "error"; text: string }

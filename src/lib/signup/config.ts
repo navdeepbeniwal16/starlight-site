@@ -1,5 +1,4 @@
-// Stubbed until #6 serves it from Sanity siteSettings.testFlightUrl. Kept in one
-// place so both beta buttons (and the route handler) read a single source.
+// Placeholder until #6 serves the real URL from Sanity siteSettings.
 const STUB_TESTFLIGHT_URL = "https://testflight.apple.com/join/STUB";
 
 export function testFlightUrl(): string {

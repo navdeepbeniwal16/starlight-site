@@ -1,6 +1,5 @@
-// The inline-feedback states the signup handler reports back to the page via the
-// `?status=` query. One source of truth so the route handler (producer) and the
-// status banner (consumer) can't drift.
+// Shared between the route handler, which sets `?status=`, and the status banner
+// that renders it.
 export const SIGNUP_STATUS = {
   joined: "joined",
   already: "already",

@@ -5,8 +5,7 @@ import { isValidEmail, normalizeEmail } from "@/lib/signup/email";
 import { parseSegment } from "@/lib/signup/segment";
 import { SIGNUP_STATUS } from "@/lib/signup/status";
 
-// 303 forces the browser to GET the destination after the POST (Post/Redirect/Get),
-// and is the exact status the beta path owes its acceptance criteria.
+// 303 forces the browser to GET the target after the POST (Post/Redirect/Get).
 function redirect(location: string, base: string): Response {
   return new Response(null, {
     status: 303,
@@ -14,9 +13,6 @@ function redirect(location: string, base: string): Response {
   });
 }
 
-// Durable-first capture: validate, commit to our Postgres system-of-record, then
-// respond. The record is safe the instant it commits here; HubSpot sync (#3) is a
-// downstream target, never a dependency of this success.
 export async function POST(request: Request): Promise<Response> {
   const form = await request.formData();
 
@@ -27,15 +23,14 @@ export async function POST(request: Request): Promise<Response> {
 
   const rawEmail = String(form.get("email") ?? "");
   if (!isValidEmail(rawEmail)) {
-    // No row is written; the page renders an inline error from ?status.
     return redirect(`/?status=${SIGNUP_STATUS.invalid}`, request.url);
   }
 
   const source = form.get("source");
   let created: boolean;
   try {
-    // ON CONFLICT DO NOTHING on the unique (email, segment): one row, idempotent.
-    // A repeat submit returns count 0 because the row is already durable.
+    // skipDuplicates compiles to ON CONFLICT DO NOTHING; count is 0 when the
+    // (email, segment) row already exists.
     const { count } = await prisma.signup.createMany({
       data: [
         {
@@ -52,8 +47,7 @@ export async function POST(request: Request): Promise<Response> {
     return redirect(`/?status=${SIGNUP_STATUS.error}`, request.url);
   }
 
-  // Beta is durable now; send the browser to TestFlight whether this was the first
-  // submit or a repeat (both leave exactly one committed row).
+  // Beta redirects to TestFlight whether the row was just created or already there.
   if (segment === Segment.beta_tester) {
     return redirect(testFlightUrl(), request.url);
   }

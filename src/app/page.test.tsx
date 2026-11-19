@@ -3,8 +3,7 @@ import { describe, expect, it } from "vitest";
 import Home from "./page";
 import { siteConfig } from "@/lib/site";
 
-// The async SignupStatus suspends under jsdom (no server), so only the static
-// shell renders here — enough to assert the hero content.
+// The async SignupStatus suspends under jsdom, so only the static shell renders.
 function renderHome() {
   return render(
     <Home params={Promise.resolve({})} searchParams={Promise.resolve({})} />,

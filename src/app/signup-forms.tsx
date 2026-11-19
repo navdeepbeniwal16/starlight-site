@@ -1,9 +1,6 @@
 import { Segment } from "@/generated/prisma/enums";
 
-// Minimal, intentionally unstyled forms that exercise both signup segments.
-// Native POST + Post/Redirect/Get (no client JS): the launch form returns to the
-// page with an inline status; the beta form follows the handler's 303 to
-// TestFlight. Warm Editorial styling lands with the real UI ticket (#2 / #10).
+// Intentionally minimal and unstyled; the Warm Editorial UI lands in #2 / #10.
 export function SignupForms() {
   return (
     <div className="flex w-full flex-col gap-8 border-t border-black/10 pt-8 text-left dark:border-white/15">

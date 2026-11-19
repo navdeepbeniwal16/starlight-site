@@ -82,7 +82,6 @@ describe("POST /api/signup", () => {
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe(process.env.TESTFLIGHT_URL);
 
-    // The row is already durable at the moment the redirect is returned.
     const rows = await prisma.signup.findMany({ where: { segment: "beta_tester" } });
     expect(rows).toHaveLength(1);
     expect(rows[0].email).toBe("beta@example.com");
