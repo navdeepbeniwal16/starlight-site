@@ -7,15 +7,15 @@ merge-gating CI pipeline and deploy-on-green via Vercel.
 
 - **Next.js 16** (App Router) + **React 19**, **TypeScript** (strict)
 - **Tailwind CSS v4**
-- **Prisma** toolchain (Postgres) — the signup schema lands in a later ticket
+- **Prisma 7** (Postgres, driver adapters) — the `signup` system-of-record + migrations
 - **Vitest** + Testing Library (unit) and **Playwright** (E2E)
 - **Vercel** hosting + Speed Insights
 
 ## Getting started
 
 ```bash
-npm install
-cp .env.example .env   # fill in DATABASE_URL when the DB-backed work begins
+npm install           # postinstall runs `prisma generate`
+cp .env.example .env   # set DATABASE_URL (Postgres) and TESTFLIGHT_URL
 npm run dev            # http://localhost:3000
 ```
 
@@ -29,13 +29,15 @@ npm run dev            # http://localhost:3000
 | `npm run lint`      | ESLint                                              |
 | `npm run typecheck` | Generate route types, then `tsc --noEmit`           |
 | `npm run test`      | Vitest unit tests                                   |
+| `npm run test:integration` | Vitest integration tests (needs Postgres via `DATABASE_URL`) |
 | `npm run test:e2e`  | Playwright E2E (builds + serves, then smokes `/`)   |
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs four jobs on every pull request (and on pushes to
-`main`): **lint**, **typecheck**, **unit**, and **e2e**. `main` is branch-protected
-so a red run blocks merge.
+`.github/workflows/ci.yml` runs five jobs on every pull request (and on pushes to
+`main`): **lint**, **typecheck**, **unit**, **integration** (signup route handler
+against an ephemeral Postgres service container), and **e2e**. `main` is
+branch-protected so a red run blocks merge.
 
 ## Deployment
 
@@ -49,6 +51,7 @@ These steps need Vercel/GitHub account access and are not scripted here:
 
 1. **Link the repo in Vercel** — import `starlight-site`, framework preset "Next.js".
    This enables PR preview URLs and production deploys on merge.
-2. **Set `DATABASE_URL`** in the Vercel project env vars once DB work begins.
-3. **Branch protection** — require the `lint`, `typecheck`, `unit`, and `e2e`
-   checks on `main` (also configurable via `gh api`).
+2. **Set `DATABASE_URL`** (Neon Postgres) and `TESTFLIGHT_URL` in the Vercel
+   project env vars.
+3. **Branch protection** — require the `lint`, `typecheck`, `unit`,
+   `integration`, and `e2e` checks on `main` (also configurable via `gh api`).
