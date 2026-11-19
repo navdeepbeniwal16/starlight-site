@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Starlight — landing visual directions (PROTOTYPE, throwaway)</title>
+<!--
+  Wayfinder ticket: "Visual design direction" (#10). THROWAWAY.
+  Three visual directions on the LOCKED copy & section skeleton (#2), switchable via ?variant=A|B|C.
+  Same 12 sections + same copy in all three; only the dressing (palette, type, section rhythm,
+  device-frame treatment, contrast strategy) changes. Device frames stand in for real screenshots/clips.
+  Shared DNA: Starlight's warm app palette (#fdfcfa paper, #2a2621 ink, #d4a574 gold) + the gold sparkle mark.
+-->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,sans-serif}
+
+  /* ---- shared device frame (re-skinned per variant) ---- */
+  .phone{width:240px;aspect-ratio:9/19.5;border-radius:2.2rem;padding:9px;flex:none}
+  .phone-screen{width:100%;height:100%;border-radius:1.7rem;display:grid;place-items:center;text-align:center;font-size:.72rem;padding:0 .9rem;position:relative;overflow:hidden}
+  .phone-screen::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:62px;height:15px;border-radius:999px;background:currentColor;opacity:.85}
+  details>summary{cursor:pointer;list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+  details[open] .chev{transform:rotate(180deg)}
+
+  /* only the active variant is shown */
+  .variant{display:none}
+  .variant.active{display:block}
+
+  /* ======================================================= A · WARM EDITORIAL ======================================================= */
+  [data-v="A"]{--paper:#fdfcfa;--beige:#f3efe8;--ink:#2a2621;--muted:#7a736a;--gold:#d4a574;--gold-strong:#b07841;--line:rgba(42,38,33,.12);background:var(--paper);color:var(--ink)}
+  [data-v="A"] .display{font-family:'Fraunces',serif;font-weight:500;letter-spacing:-.01em;line-height:1.05}
+  [data-v="A"] .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-strong)}
+  [data-v="A"] .band{background:var(--beige)}
+  [data-v="A"] .rule{border-color:var(--line)}
+  [data-v="A"] .phone{background:#efe9df;box-shadow:0 30px 60px -32px rgba(42,38,33,.28)}
+  [data-v="A"] .phone-screen{background:#fffdf8;color:var(--muted);border:1px solid rgba(42,38,33,.06)}
+  [data-v="A"] .btn-primary{background:var(--ink);color:var(--paper)}
+  [data-v="A"] .btn-ghost{border:1px solid var(--line);color:var(--ink)}
+  [data-v="A"] .chip{background:var(--gold);color:var(--ink)}
+  /* Borrowed from Soft Spotlight: a dark, dramatic break for the key beta-conversion section. */
+  [data-v="A"] .stage-dark{background:radial-gradient(120% 120% at 70% 0%,#2a2318 0%,#1c1813 55%)}
+  [data-v="A"] .btn-gold{background:var(--gold);color:#1c1813;box-shadow:0 10px 30px -8px rgba(212,165,116,.5)}
+
+  /* ======================================================= B · SOFT SPOTLIGHT ======================================================= */
+  [data-v="B"]{--paper:#fbf8f3;--ink:#241f1a;--muted:#8a8178;--gold:#d4a574;--dark:#1c1813;--dark2:#241f18;--line:rgba(42,38,33,.10);background:var(--paper);color:var(--ink)}
+  [data-v="B"] .display{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.03em;line-height:1.02}
+  [data-v="B"] .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  [data-v="B"] .stage{background:radial-gradient(120% 120% at 70% 0%,#2a2318 0%,var(--dark) 55%)}
+  [data-v="B"] .stage .eyebrow{color:var(--gold)}
+  [data-v="B"] .phone{background:#0f0c08;box-shadow:0 40px 80px -30px rgba(0,0,0,.6),0 0 0 1px rgba(212,165,116,.18)}
+  [data-v="B"] .phone-screen{background:linear-gradient(160deg,#2b2419,#1a1610);color:#b9ad9b}
+  [data-v="B"] .phone-glow{filter:drop-shadow(0 25px 60px rgba(212,165,116,.22))}
+  [data-v="B"] .phone-light{background:#efe7da;box-shadow:0 30px 60px -34px rgba(42,38,33,.3)}
+  [data-v="B"] .phone-light .phone-screen{background:#fffdf8;color:var(--muted)}
+  [data-v="B"] .btn-primary{background:var(--gold);color:#241f1a;box-shadow:0 10px 30px -8px rgba(212,165,116,.6)}
+  [data-v="B"] .btn-ondark{background:var(--gold);color:#1c1813}
+  [data-v="B"] .btn-ghost{border:1px solid var(--line);color:var(--ink)}
+
+  /* ======================================================= C · STRUCTURED GRID ======================================================= */
+  [data-v="C"]{--paper:#fbfaf7;--card:#ffffff;--ink:#26221d;--muted:#78716a;--gold:#c98f4f;--line:#e7e1d6;--line2:#d8d0c2;background:var(--paper);color:var(--ink)}
+  [data-v="C"] .display{font-family:'Inter',sans-serif;font-weight:700;letter-spacing:-.035em;line-height:1.04}
+  [data-v="C"] .mono{font-family:'JetBrains Mono',monospace}
+  [data-v="C"] .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.02em;text-transform:uppercase;color:var(--gold)}
+  [data-v="C"] .card{background:var(--card);border:1px solid var(--line);border-radius:18px}
+  [data-v="C"] .ruled{border-color:var(--line)}
+  [data-v="C"] .phone{background:#1c1813;border-radius:1.9rem;box-shadow:0 2px 0 var(--line2)}
+  [data-v="C"] .phone-screen{background:#faf8f4;color:var(--muted);border:1px solid rgba(0,0,0,.04)}
+  [data-v="C"] .btn-primary{background:var(--ink);color:#fff;border-radius:10px}
+  [data-v="C"] .btn-ghost{border:1px solid var(--line2);color:var(--ink);border-radius:10px}
+
+  /* ---- floating switcher (obviously not part of the design) ---- */
+  #switch{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:.25rem;background:#0f172a;color:#fff;border-radius:999px;padding:.4rem .5rem;box-shadow:0 12px 30px -8px rgba(0,0,0,.5);font-family:'Inter',sans-serif;font-size:.8rem}
+  #switch button{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.1)}
+  #switch button:hover{background:rgba(255,255,255,.22)}
+  #switch .lbl{padding:0 .6rem;font-weight:600;white-space:nowrap}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- ============================================================= VARIANT A · WARM EDITORIAL ============================================================= -->
+<div class="variant" data-v="A">
+  <!-- 1 HERO -->
+  <header class="max-w-6xl mx-auto px-6 pt-10 pb-24">
+    <div class="inline-flex items-center gap-2 mb-16">
+      <span class="w-7 h-7 grid place-items-center">★</span>
+      <span class="font-semibold tracking-tight">Starlight</span>
+    </div>
+    <div class="grid md:grid-cols-2 gap-14 items-center">
+      <div>
+        <p class="eyebrow">AI day planner</p>
+        <h1 class="display mt-5 text-5xl sm:text-6xl">Turn an endless to-do list into a focused day.</h1>
+        <p class="mt-7 text-lg text-[var(--muted)] leading-relaxed">Starlight picks your most valuable tasks and time-boxes them around your real routine — so you spend your energy on the work that matters.</p>
+        <div class="mt-9 flex flex-col sm:flex-row gap-3">
+          <a href="#beta" class="btn-primary px-6 py-3.5 rounded-full font-semibold text-center">Get the iOS beta</a>
+          <a href="#notify" class="btn-ghost px-6 py-3.5 rounded-full font-semibold text-center">Notify me at launch</a>
+        </div>
+        <p class="mt-5 text-sm text-[var(--muted)]">On iPhone via TestFlight today · App Store &amp; Google Play coming soon</p>
+      </div>
+      <div class="flex justify-center"><div class="phone"><div class="phone-screen">[ Today, scheduled ]</div></div></div>
+    </div>
+  </header>
+
+  <!-- 2 PLAN (clip) -->
+  <section class="band border-y rule">
+    <div class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+      <div class="flex justify-center md:order-2"><div class="phone"><div class="phone-screen">[ CLIP · Proposed plan ]</div></div></div>
+      <div class="md:order-1">
+        <p class="eyebrow">The payoff</p>
+        <h2 class="display mt-5 text-4xl">Your day, already planned.</h2>
+        <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Starlight reads your backlog, finds what actually matters, and lays it out in time blocks around your routine. Review it, drag anything, confirm.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 BACKLOG (clip) -->
+  <section class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+    <div class="flex justify-center"><div class="phone"><div class="phone-screen">[ CLIP · Sync / add tasks ]</div></div></div>
+    <div>
+      <p class="eyebrow">Start here</p>
+      <h2 class="display mt-5 text-4xl">Start from the real list.</h2>
+      <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Add tasks or sync them in. However long the backlog, Starlight works from what's really on your plate — not a fresh empty list.</p>
+    </div>
+  </section>
+
+  <!-- 4 SHAPE (clip) -->
+  <section class="band border-y rule">
+    <div class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+      <div class="flex justify-center md:order-2"><div class="phone"><div class="phone-screen">[ CLIP · Shape your day ]</div></div></div>
+      <div class="md:order-1">
+        <p class="eyebrow">Your routine</p>
+        <h2 class="display mt-5 text-4xl">Built around your real day.</h2>
+        <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Set your wake and sleep times and block the routines you can't move. Starlight plans into the gaps that are actually free.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 HOW IT WORKS -->
+  <section class="max-w-5xl mx-auto px-6 py-28 text-center">
+    <h2 class="display text-4xl">A focused day. In under a minute.</h2>
+    <div class="mt-16 grid sm:grid-cols-3 gap-12 text-left">
+      <div><div class="display text-3xl text-[var(--gold)]">01</div><div class="mt-3 font-semibold text-lg">Dump</div><p class="mt-2 text-[var(--muted)]">Add or sync your tasks. Everything on your plate, in one place.</p></div>
+      <div><div class="display text-3xl text-[var(--gold)]">02</div><div class="mt-3 font-semibold text-lg">Shape</div><p class="mt-2 text-[var(--muted)]">Set your hours and block the routines you can't move.</p></div>
+      <div><div class="display text-3xl text-[var(--gold)]">03</div><div class="mt-3 font-semibold text-lg">Plan</div><p class="mt-2 text-[var(--muted)]">Starlight builds your time-boxed day. Rearrange anything, then go.</p></div>
+    </div>
+    <p class="mt-14 text-[var(--muted)]">Plans change — replan on the fly, and the day bends when your day does.</p>
+  </section>
+
+  <!-- 6 WORK YOUR DAY -->
+  <section class="band border-y rule">
+    <div class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+      <div class="flex justify-center"><div class="phone"><div class="phone-screen">[ screenshot · Today, working ]</div></div></div>
+      <div>
+        <p class="eyebrow">Then just do it</p>
+        <h2 class="display mt-5 text-4xl">A clear day, one block at a time.</h2>
+        <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Check tasks off as you go. When the day shifts, replan in a tap and keep moving.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 PROJECTS -->
+  <section class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+    <div class="flex justify-center md:order-2"><div class="phone"><div class="phone-screen">[ screenshot · Projects ]</div></div></div>
+    <div class="md:order-1">
+      <p class="eyebrow">Context, once</p>
+      <h2 class="display mt-5 text-4xl">Group tasks under a project.</h2>
+      <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Like Projects in Claude or ChatGPT: spin up a project — your job search, a side build — give it your goals and priorities once, and drop tasks into it. Starlight carries that context into planning and batches a project's tasks together, instead of asking you to re-explain them on every task.</p>
+    </div>
+  </section>
+
+  <!-- 8 BETA — dark spotlight break (borrowed from variant B) for the key conversion section -->
+  <section id="beta" class="stage-dark text-[#f3ece0]">
+    <div class="max-w-3xl mx-auto px-6 py-28 text-center">
+      <p class="eyebrow" style="color:var(--gold)">Help shape Starlight</p>
+      <h2 class="display mt-5 text-4xl">Become a beta tester.</h2>
+      <p class="mt-6 text-lg text-[#c9bfb0] leading-relaxed max-w-2xl mx-auto">Join the iOS beta, send feedback as you use it, and get <span class="text-[var(--gold)] font-semibold">6 months free</span> when Starlight launches paid. You help shape the product — I'll make it worth your while.</p>
+      <div class="mt-9"><a href="#" class="btn-gold px-7 py-3.5 rounded-full font-semibold inline-block">Join the TestFlight beta</a></div>
+      <p class="mt-5 text-sm text-[#9a9081]">iPhone only for now, via TestFlight · we'll grab your email first, for the 6-month offer and updates.</p>
+    </div>
+  </section>
+
+  <!-- 9 PRICING -->
+  <section class="band border-y rule">
+    <div class="max-w-md mx-auto px-6 py-28 text-center">
+      <h2 class="display text-4xl">Free while we're in beta.</h2>
+      <div class="mt-10 rounded-3xl border rule bg-[var(--paper)] p-9 text-left">
+        <div class="font-semibold text-lg">Beta</div>
+        <div class="display mt-1 text-4xl">Free</div>
+        <ul class="mt-6 space-y-2.5 text-[var(--muted)]">
+          <li>✓ Every feature, no limits</li>
+          <li>✓ All updates as they ship</li>
+          <li>✓ 6 months free after launch (beta testers)</li>
+        </ul>
+      </div>
+      <p class="mt-6 text-sm text-[var(--muted)]">Paid plans arrive after launch. Beta testers keep their 6 months free.</p>
+    </div>
+  </section>
+
+  <!-- 10 FAQ -->
+  <section class="max-w-2xl mx-auto px-6 py-28">
+    <h2 class="display text-4xl text-center">Before you ask.</h2>
+    <div class="mt-12 border-y rule divide-y" style="border-color:var(--line)">
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">What is Starlight?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">An AI day planner. It takes your task backlog and your routine and builds a focused, time-boxed plan for today — so you're not the one deciding what to do next.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">How's it different from a to-do app or calendar?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">To-do apps hold the list; calendars hold the time. Starlight does the hard part in between — deciding what actually matters today and placing it in the time you really have.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">How does it pick what matters?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">It weighs urgency and value across your backlog, then fits the top of that list into your free blocks. You can always rearrange before you commit.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">Is it free? What will it cost later?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">Free throughout the beta. Paid plans come after launch — and beta testers keep 6 months free.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">Which devices?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">iPhone today, through TestFlight. The official App Store and Google Play versions are launching soon — leave your email and we'll tell you when.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">Is my data private?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">[ straw-man — resolve in the privacy ticket. ] We collect only what's needed to plan your day and to run the waitlist.</p></details>
+    </div>
+  </section>
+
+  <!-- 11 FINAL CTA + notify -->
+  <section id="notify" class="band border-t rule">
+    <div class="max-w-xl mx-auto px-6 py-28 text-center">
+      <h2 class="display text-4xl">Ready for a focused day?</h2>
+      <div class="mt-9"><a href="#beta" class="btn-primary px-7 py-3.5 rounded-full font-semibold inline-block">Get the iOS beta</a></div>
+      <p class="mt-12 text-[var(--muted)]">Not on iPhone? Get notified when Starlight hits the App Store &amp; Google Play.</p>
+      <form class="mt-6 text-left space-y-3" onsubmit="event.preventDefault();this.querySelector('.nf').classList.add('hidden');this.querySelector('.nt').classList.remove('hidden')">
+        <div class="nf space-y-3">
+          <input required placeholder="Your name" class="w-full rounded-full px-4 py-3 border rule bg-[var(--paper)]" />
+          <input required type="email" placeholder="you@email.com" class="w-full rounded-full px-4 py-3 border rule bg-[var(--paper)]" />
+          <button class="btn-primary w-full py-3.5 rounded-full font-semibold">Notify me at launch</button>
+          <p class="text-xs text-[var(--muted)] text-center">Your name and email, to tell you once when we launch. That's all we collect here.</p>
+        </div>
+        <div class="nt hidden rounded-2xl border rule p-6 text-center bg-[var(--paper)]"><div class="text-2xl">✓</div><p class="mt-2 font-semibold">You're on the launch list.</p><p class="mt-1 text-[var(--muted)] text-sm">We'll reach out when Starlight is on the stores.</p></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 12 FOOTER -->
+  <footer class="border-t rule">
+    <div class="max-w-6xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--muted)]">
+      <div class="inline-flex items-center gap-2">★ Starlight — an AI day planner</div>
+      <div class="flex flex-wrap gap-6 justify-center">
+        <a href="#" class="hover:text-[var(--ink)]">Support</a><a href="#" class="hover:text-[var(--ink)]">Privacy</a><a href="#" class="hover:text-[var(--ink)]">Terms</a><a href="#" class="hover:text-[var(--ink)]">How this site was built</a>
+      </div>
+      <div>© 2026 Starlight</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================= VARIANT B · SOFT SPOTLIGHT ============================================================= -->
+<div class="variant" data-v="B">
+  <!-- 1 HERO — dark stage -->
+  <header class="stage text-[#f3ece0]">
+    <div class="max-w-6xl mx-auto px-6 pt-10 pb-28">
+      <div class="inline-flex items-center gap-2 mb-16">
+        <span class="w-7 h-7 grid place-items-center text-[var(--gold)]">★</span>
+        <span class="font-semibold tracking-tight">Starlight</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-14 items-center">
+        <div>
+          <p class="eyebrow">AI day planner</p>
+          <h1 class="display mt-5 text-5xl sm:text-6xl">Turn an endless to-do list into a focused day.</h1>
+          <p class="mt-7 text-lg text-[#c9bfb0] leading-relaxed">Starlight picks your most valuable tasks and time-boxes them around your real routine — so you spend your energy on the work that matters.</p>
+          <div class="mt-9 flex flex-col sm:flex-row gap-3">
+            <a href="#beta" class="btn-ondark px-6 py-3.5 rounded-full font-semibold text-center">Get the iOS beta</a>
+            <a href="#notify" class="px-6 py-3.5 rounded-full font-semibold text-center border border-[rgba(243,236,224,.25)]">Notify me at launch</a>
+          </div>
+          <p class="mt-5 text-sm text-[#9a9081]">On iPhone via TestFlight today · App Store &amp; Google Play coming soon</p>
+        </div>
+        <div class="flex justify-center"><div class="phone phone-glow"><div class="phone-screen">[ Today, scheduled ]</div></div></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2 PLAN (clip) — spotlit on dark -->
+  <section class="stage text-[#f3ece0] border-t border-[rgba(255,255,255,.06)]">
+    <div class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+      <div class="flex justify-center md:order-2"><div class="phone phone-glow"><div class="phone-screen">[ CLIP · Proposed plan ]</div></div></div>
+      <div class="md:order-1">
+        <p class="eyebrow">The payoff</p>
+        <h2 class="display mt-5 text-4xl">Your day, already planned.</h2>
+        <p class="mt-6 text-lg text-[#c9bfb0] leading-relaxed">Starlight reads your backlog, finds what actually matters, and lays it out in time blocks around your routine. Review it, drag anything, confirm.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 BACKLOG (clip) — light -->
+  <section class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+    <div class="flex justify-center"><div class="phone phone-light"><div class="phone-screen">[ CLIP · Sync / add tasks ]</div></div></div>
+    <div>
+      <p class="eyebrow" style="color:var(--gold)">Start here</p>
+      <h2 class="display mt-5 text-4xl">Start from the real list.</h2>
+      <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Add tasks or sync them in. However long the backlog, Starlight works from what's really on your plate — not a fresh empty list.</p>
+    </div>
+  </section>
+
+  <!-- 4 SHAPE (clip) — spotlit on dark -->
+  <section class="stage text-[#f3ece0] border-y border-[rgba(255,255,255,.06)]">
+    <div class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+      <div class="flex justify-center md:order-2"><div class="phone phone-glow"><div class="phone-screen">[ CLIP · Shape your day ]</div></div></div>
+      <div class="md:order-1">
+        <p class="eyebrow">Your routine</p>
+        <h2 class="display mt-5 text-4xl">Built around your real day.</h2>
+        <p class="mt-6 text-lg text-[#c9bfb0] leading-relaxed">Set your wake and sleep times and block the routines you can't move. Starlight plans into the gaps that are actually free.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 HOW IT WORKS — light -->
+  <section class="max-w-5xl mx-auto px-6 py-28 text-center">
+    <h2 class="display text-4xl">A focused day. In under a minute.</h2>
+    <div class="mt-16 grid sm:grid-cols-3 gap-12 text-left">
+      <div><div class="display text-3xl text-[var(--gold)]">01</div><div class="mt-3 font-semibold text-lg">Dump</div><p class="mt-2 text-[var(--muted)]">Add or sync your tasks. Everything on your plate, in one place.</p></div>
+      <div><div class="display text-3xl text-[var(--gold)]">02</div><div class="mt-3 font-semibold text-lg">Shape</div><p class="mt-2 text-[var(--muted)]">Set your hours and block the routines you can't move.</p></div>
+      <div><div class="display text-3xl text-[var(--gold)]">03</div><div class="mt-3 font-semibold text-lg">Plan</div><p class="mt-2 text-[var(--muted)]">Starlight builds your time-boxed day. Rearrange anything, then go.</p></div>
+    </div>
+    <p class="mt-14 text-[var(--muted)]">Plans change — replan on the fly, and the day bends when your day does.</p>
+  </section>
+
+  <!-- 6 WORK YOUR DAY — light -->
+  <section class="bg-[#f4efe7] border-y border-[var(--line)]">
+    <div class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+      <div class="flex justify-center"><div class="phone phone-light"><div class="phone-screen">[ screenshot · Today, working ]</div></div></div>
+      <div>
+        <p class="eyebrow" style="color:var(--gold)">Then just do it</p>
+        <h2 class="display mt-5 text-4xl">A clear day, one block at a time.</h2>
+        <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Check tasks off as you go. When the day shifts, replan in a tap and keep moving.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 PROJECTS — light -->
+  <section class="max-w-6xl mx-auto px-6 py-28 grid md:grid-cols-2 gap-14 items-center">
+    <div class="flex justify-center md:order-2"><div class="phone phone-light"><div class="phone-screen">[ screenshot · Projects ]</div></div></div>
+    <div class="md:order-1">
+      <p class="eyebrow" style="color:var(--gold)">Context, once</p>
+      <h2 class="display mt-5 text-4xl">Group tasks under a project.</h2>
+      <p class="mt-6 text-lg text-[var(--muted)] leading-relaxed">Like Projects in Claude or ChatGPT: spin up a project — your job search, a side build — give it your goals and priorities once, and drop tasks into it. Starlight carries that context into planning and batches a project's tasks together, instead of asking you to re-explain them on every task.</p>
+    </div>
+  </section>
+
+  <!-- 8 BETA — dark spotlight -->
+  <section id="beta" class="stage text-[#f3ece0]">
+    <div class="max-w-3xl mx-auto px-6 py-28 text-center">
+      <p class="eyebrow">Help shape Starlight</p>
+      <h2 class="display mt-5 text-4xl">Become a beta tester.</h2>
+      <p class="mt-6 text-lg text-[#c9bfb0] leading-relaxed max-w-2xl mx-auto">Join the iOS beta, send feedback as you use it, and get <span class="text-[var(--gold)] font-semibold">6 months free</span> when Starlight launches paid. You help shape the product — I'll make it worth your while.</p>
+      <div class="mt-9"><a href="#" class="btn-ondark px-7 py-3.5 rounded-full font-semibold inline-block">Join the TestFlight beta</a></div>
+      <p class="mt-5 text-sm text-[#9a9081]">iPhone only for now, via TestFlight · we'll grab your email first, for the 6-month offer and updates.</p>
+    </div>
+  </section>
+
+  <!-- 9 PRICING — light -->
+  <section class="max-w-md mx-auto px-6 py-28 text-center">
+    <h2 class="display text-4xl">Free while we're in beta.</h2>
+    <div class="mt-10 rounded-3xl p-9 text-left" style="border:1px solid var(--line);box-shadow:0 30px 60px -40px rgba(42,38,33,.3)">
+      <div class="font-semibold text-lg">Beta</div>
+      <div class="display mt-1 text-4xl text-[var(--gold)]">Free</div>
+      <ul class="mt-6 space-y-2.5 text-[var(--muted)]">
+        <li>✓ Every feature, no limits</li><li>✓ All updates as they ship</li><li>✓ 6 months free after launch (beta testers)</li>
+      </ul>
+    </div>
+    <p class="mt-6 text-sm text-[var(--muted)]">Paid plans arrive after launch. Beta testers keep their 6 months free.</p>
+  </section>
+
+  <!-- 10 FAQ — light -->
+  <section class="max-w-2xl mx-auto px-6 py-28">
+    <h2 class="display text-4xl text-center">Before you ask.</h2>
+    <div class="mt-12 border-y divide-y" style="border-color:var(--line)">
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">What is Starlight?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">An AI day planner. It takes your task backlog and your routine and builds a focused, time-boxed plan for today — so you're not the one deciding what to do next.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">How's it different from a to-do app or calendar?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">To-do apps hold the list; calendars hold the time. Starlight does the hard part in between — deciding what actually matters today and placing it in the time you really have.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">How does it pick what matters?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">It weighs urgency and value across your backlog, then fits the top of that list into your free blocks. You can always rearrange before you commit.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">Is it free? What will it cost later?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">Free throughout the beta. Paid plans come after launch — and beta testers keep 6 months free.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">Which devices?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">iPhone today, through TestFlight. The official App Store and Google Play versions are launching soon — leave your email and we'll tell you when.</p></details>
+      <details class="py-5"><summary class="flex justify-between items-center font-semibold">Is my data private?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">[ straw-man — resolve in the privacy ticket. ] We collect only what's needed to plan your day and to run the waitlist.</p></details>
+    </div>
+  </section>
+
+  <!-- 11 FINAL CTA — dark -->
+  <section id="notify" class="stage text-[#f3ece0]">
+    <div class="max-w-xl mx-auto px-6 py-28 text-center">
+      <h2 class="display text-4xl">Ready for a focused day?</h2>
+      <div class="mt-9"><a href="#beta" class="btn-ondark px-7 py-3.5 rounded-full font-semibold inline-block">Get the iOS beta</a></div>
+      <p class="mt-12 text-[#c9bfb0]">Not on iPhone? Get notified when Starlight hits the App Store &amp; Google Play.</p>
+      <form class="mt-6 text-left space-y-3" onsubmit="event.preventDefault();this.querySelector('.nf').classList.add('hidden');this.querySelector('.nt').classList.remove('hidden')">
+        <div class="nf space-y-3">
+          <input required placeholder="Your name" class="w-full rounded-full px-4 py-3 text-[var(--ink)]" />
+          <input required type="email" placeholder="you@email.com" class="w-full rounded-full px-4 py-3 text-[var(--ink)]" />
+          <button class="btn-ondark w-full py-3.5 rounded-full font-semibold">Notify me at launch</button>
+          <p class="text-xs text-[#9a9081] text-center">Your name and email, to tell you once when we launch. That's all we collect here.</p>
+        </div>
+        <div class="nt hidden rounded-2xl border border-[rgba(243,236,224,.2)] p-6 text-center"><div class="text-2xl text-[var(--gold)]">✓</div><p class="mt-2 font-semibold">You're on the launch list.</p><p class="mt-1 text-[#c9bfb0] text-sm">We'll reach out when Starlight is on the stores.</p></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 12 FOOTER -->
+  <footer class="border-t" style="border-color:var(--line)">
+    <div class="max-w-6xl mx-auto px-6 py-14 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--muted)]">
+      <div class="inline-flex items-center gap-2"><span class="text-[var(--gold)]">★</span> Starlight — an AI day planner</div>
+      <div class="flex flex-wrap gap-6 justify-center"><a href="#" class="hover:text-[var(--ink)]">Support</a><a href="#" class="hover:text-[var(--ink)]">Privacy</a><a href="#" class="hover:text-[var(--ink)]">Terms</a><a href="#" class="hover:text-[var(--ink)]">How this site was built</a></div>
+      <div>© 2026 Starlight</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================= VARIANT C · STRUCTURED GRID ============================================================= -->
+<div class="variant" data-v="C">
+  <!-- top nav rule -->
+  <div class="border-b ruled">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="inline-flex items-center gap-2"><span class="text-[var(--gold)]">★</span><span class="font-semibold tracking-tight">Starlight</span></div>
+      <span class="eyebrow">AI day planner</span>
+    </div>
+  </div>
+
+  <!-- 1 HERO — asymmetric split, bordered media -->
+  <header class="max-w-6xl mx-auto px-6 border-x ruled">
+    <div class="grid md:grid-cols-5 gap-0 md:min-h-[80vh]">
+      <div class="md:col-span-3 py-20 pr-0 md:pr-12 flex flex-col justify-center">
+        <p class="eyebrow">[ 01 ] what it does</p>
+        <h1 class="display mt-5 text-5xl sm:text-6xl">Turn an endless to-do list into a focused day.</h1>
+        <p class="mt-7 text-lg text-[var(--muted)] leading-relaxed max-w-lg">Starlight picks your most valuable tasks and time-boxes them around your real routine — so you spend your energy on the work that matters.</p>
+        <div class="mt-9 flex flex-col sm:flex-row gap-3">
+          <a href="#beta" class="btn-primary px-6 py-3.5 font-semibold text-center">Get the iOS beta</a>
+          <a href="#notify" class="btn-ghost px-6 py-3.5 font-semibold text-center">Notify me at launch</a>
+        </div>
+        <p class="mono mt-5 text-xs text-[var(--muted)]">iOS · TestFlight today → App Store &amp; Google Play soon</p>
+      </div>
+      <div class="md:col-span-2 border-l ruled grid place-items-center py-16 bg-[#faf8f4]"><div class="phone"><div class="phone-screen">[ Today, scheduled ]</div></div></div>
+    </div>
+  </header>
+
+  <!-- 2–4 CORE FEATURES — ruled media cards, full-bleed one idea each -->
+  <section class="max-w-6xl mx-auto px-6 border-x ruled">
+    <!-- 2 PLAN -->
+    <div class="grid md:grid-cols-5 border-t ruled">
+      <div class="md:col-span-2 border-r ruled grid place-items-center py-20 bg-[#faf8f4]"><div class="phone"><div class="phone-screen">[ CLIP · Proposed plan ]</div></div></div>
+      <div class="md:col-span-3 py-20 px-0 md:px-12 flex flex-col justify-center">
+        <p class="eyebrow">[ 02 ] the payoff</p>
+        <h2 class="display mt-4 text-4xl">Your day, already planned.</h2>
+        <p class="mt-5 text-lg text-[var(--muted)] leading-relaxed max-w-lg">Starlight reads your backlog, finds what actually matters, and lays it out in time blocks around your routine. Review it, drag anything, confirm.</p>
+      </div>
+    </div>
+    <!-- 3 BACKLOG -->
+    <div class="grid md:grid-cols-5 border-t ruled">
+      <div class="md:col-span-3 py-20 px-0 md:px-12 flex flex-col justify-center order-2 md:order-1">
+        <p class="eyebrow">[ 03 ] start here</p>
+        <h2 class="display mt-4 text-4xl">Start from the real list.</h2>
+        <p class="mt-5 text-lg text-[var(--muted)] leading-relaxed max-w-lg">Add tasks or sync them in. However long the backlog, Starlight works from what's really on your plate — not a fresh empty list.</p>
+      </div>
+      <div class="md:col-span-2 border-l ruled grid place-items-center py-20 bg-[#faf8f4] order-1 md:order-2"><div class="phone"><div class="phone-screen">[ CLIP · Sync / add tasks ]</div></div></div>
+    </div>
+    <!-- 4 SHAPE -->
+    <div class="grid md:grid-cols-5 border-t ruled">
+      <div class="md:col-span-2 border-r ruled grid place-items-center py-20 bg-[#faf8f4]"><div class="phone"><div class="phone-screen">[ CLIP · Shape your day ]</div></div></div>
+      <div class="md:col-span-3 py-20 px-0 md:px-12 flex flex-col justify-center">
+        <p class="eyebrow">[ 04 ] your routine</p>
+        <h2 class="display mt-4 text-4xl">Built around your real day.</h2>
+        <p class="mt-5 text-lg text-[var(--muted)] leading-relaxed max-w-lg">Set your wake and sleep times and block the routines you can't move. Starlight plans into the gaps that are actually free.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 HOW IT WORKS — bento 3-up cards -->
+  <section class="bg-[#f4efe7] border-y ruled">
+    <div class="max-w-6xl mx-auto px-6 py-24">
+      <div class="flex items-end justify-between flex-wrap gap-4">
+        <h2 class="display text-4xl">A focused day.<br>In under a minute.</h2>
+        <p class="mono text-xs text-[var(--muted)] max-w-xs">replan on the fly — the day bends when your day does.</p>
+      </div>
+      <div class="mt-12 grid sm:grid-cols-3 gap-4">
+        <div class="card p-7"><div class="mono text-[var(--gold)] text-sm">01</div><div class="mt-3 font-semibold text-lg">Dump</div><p class="mt-2 text-[var(--muted)]">Add or sync your tasks. Everything on your plate, in one place.</p></div>
+        <div class="card p-7"><div class="mono text-[var(--gold)] text-sm">02</div><div class="mt-3 font-semibold text-lg">Shape</div><p class="mt-2 text-[var(--muted)]">Set your hours and block the routines you can't move.</p></div>
+        <div class="card p-7"><div class="mono text-[var(--gold)] text-sm">03</div><div class="mt-3 font-semibold text-lg">Plan</div><p class="mt-2 text-[var(--muted)]">Starlight builds your time-boxed day. Rearrange anything, then go.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 + 7 WORK + PROJECTS — two bento cards side by side -->
+  <section class="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-4">
+    <div class="card p-8 flex flex-col">
+      <p class="eyebrow">[ 05 ] then just do it</p>
+      <h2 class="display mt-4 text-3xl">A clear day, one block at a time.</h2>
+      <p class="mt-4 text-[var(--muted)] leading-relaxed">Check tasks off as you go. When the day shifts, replan in a tap and keep moving.</p>
+      <div class="mt-8 flex-1 grid place-items-center"><div class="phone" style="transform:scale(.9)"><div class="phone-screen">[ screenshot · Today, working ]</div></div></div>
+    </div>
+    <div class="card p-8 flex flex-col">
+      <p class="eyebrow">[ 06 ] context, once</p>
+      <h2 class="display mt-4 text-3xl">Group tasks under a project.</h2>
+      <p class="mt-4 text-[var(--muted)] leading-relaxed">Like Projects in Claude or ChatGPT: give a project your goals once and drop tasks into it. Starlight carries that context into planning and batches a project's tasks together, instead of re-explaining them on every task.</p>
+      <div class="mt-8 flex-1 grid place-items-center"><div class="phone" style="transform:scale(.9)"><div class="phone-screen">[ screenshot · Projects ]</div></div></div>
+    </div>
+  </section>
+
+  <!-- 8 BETA — full-bleed highlight card -->
+  <section id="beta" class="max-w-6xl mx-auto px-6 pb-24">
+    <div class="card p-12 text-center" style="border-color:var(--line2)">
+      <p class="eyebrow">[ 07 ] help shape Starlight</p>
+      <h2 class="display mt-4 text-4xl">Become a beta tester.</h2>
+      <p class="mt-5 text-lg text-[var(--muted)] leading-relaxed max-w-2xl mx-auto">Join the iOS beta, send feedback as you use it, and get <span class="mono text-[var(--gold)] font-semibold">6 months free</span> when Starlight launches paid. You help shape the product — I'll make it worth your while.</p>
+      <div class="mt-8"><a href="#" class="btn-primary px-7 py-3.5 font-semibold inline-block">Join the TestFlight beta</a></div>
+      <p class="mono mt-4 text-xs text-[var(--muted)]">iPhone only for now · email first, for the 6-month offer + updates.</p>
+    </div>
+  </section>
+
+  <!-- 9 PRICING -->
+  <section class="max-w-md mx-auto px-6 pb-24 text-center">
+    <h2 class="display text-4xl">Free while we're in beta.</h2>
+    <div class="card mt-8 p-8 text-left">
+      <div class="flex items-baseline justify-between"><div class="font-semibold text-lg">Beta</div><div class="display text-3xl text-[var(--gold)]">Free</div></div>
+      <ul class="mt-6 space-y-2.5 text-[var(--muted)] mono text-sm">
+        <li>✓ Every feature, no limits</li><li>✓ All updates as they ship</li><li>✓ 6 months free after launch</li>
+      </ul>
+    </div>
+    <p class="mt-5 text-sm text-[var(--muted)]">Paid plans arrive after launch. Beta testers keep their 6 months free.</p>
+  </section>
+
+  <!-- 10 FAQ -->
+  <section class="max-w-2xl mx-auto px-6 pb-24">
+    <h2 class="display text-4xl text-center">Before you ask.</h2>
+    <div class="mt-10 space-y-3">
+      <details class="card p-5"><summary class="flex justify-between items-center font-semibold">What is Starlight?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">An AI day planner. It takes your task backlog and your routine and builds a focused, time-boxed plan for today — so you're not the one deciding what to do next.</p></details>
+      <details class="card p-5"><summary class="flex justify-between items-center font-semibold">How's it different from a to-do app or calendar?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">To-do apps hold the list; calendars hold the time. Starlight does the hard part in between — deciding what actually matters today and placing it in the time you really have.</p></details>
+      <details class="card p-5"><summary class="flex justify-between items-center font-semibold">How does it pick what matters?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">It weighs urgency and value across your backlog, then fits the top of that list into your free blocks. You can always rearrange before you commit.</p></details>
+      <details class="card p-5"><summary class="flex justify-between items-center font-semibold">Is it free? What will it cost later?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">Free throughout the beta. Paid plans come after launch — and beta testers keep 6 months free.</p></details>
+      <details class="card p-5"><summary class="flex justify-between items-center font-semibold">Which devices?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">iPhone today, through TestFlight. The official App Store and Google Play versions are launching soon — leave your email and we'll tell you when.</p></details>
+      <details class="card p-5"><summary class="flex justify-between items-center font-semibold">Is my data private?<span class="chev transition">⌄</span></summary><p class="mt-3 text-[var(--muted)]">[ straw-man — resolve in the privacy ticket. ] We collect only what's needed to plan your day and to run the waitlist.</p></details>
+    </div>
+  </section>
+
+  <!-- 11 FINAL CTA + notify -->
+  <section id="notify" class="border-t ruled bg-[#f4efe7]">
+    <div class="max-w-xl mx-auto px-6 py-24 text-center">
+      <h2 class="display text-4xl">Ready for a focused day?</h2>
+      <div class="mt-8"><a href="#beta" class="btn-primary px-7 py-3.5 font-semibold inline-block">Get the iOS beta</a></div>
+      <p class="mt-12 text-[var(--muted)]">Not on iPhone? Get notified when Starlight hits the App Store &amp; Google Play.</p>
+      <form class="mt-6 text-left space-y-3" onsubmit="event.preventDefault();this.querySelector('.nf').classList.add('hidden');this.querySelector('.nt').classList.remove('hidden')">
+        <div class="nf space-y-3">
+          <input required placeholder="Your name" class="w-full px-4 py-3 border ruled rounded-[10px] bg-white" />
+          <input required type="email" placeholder="you@email.com" class="w-full px-4 py-3 border ruled rounded-[10px] bg-white" />
+          <button class="btn-primary w-full py-3.5 font-semibold">Notify me at launch</button>
+          <p class="mono text-xs text-[var(--muted)] text-center">name + email, to tell you once when we launch.</p>
+        </div>
+        <div class="nt hidden card p-6 text-center"><div class="text-2xl text-[var(--gold)]">✓</div><p class="mt-2 font-semibold">You're on the launch list.</p><p class="mt-1 text-[var(--muted)] text-sm">We'll reach out when Starlight is on the stores.</p></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 12 FOOTER -->
+  <footer class="border-t ruled">
+    <div class="max-w-6xl mx-auto px-6 py-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[var(--muted)]">
+      <div class="inline-flex items-center gap-2"><span class="text-[var(--gold)]">★</span> Starlight — an AI day planner</div>
+      <div class="flex flex-wrap gap-6 justify-center mono text-xs"><a href="#" class="hover:text-[var(--ink)]">Support</a><a href="#" class="hover:text-[var(--ink)]">Privacy</a><a href="#" class="hover:text-[var(--ink)]">Terms</a><a href="#" class="hover:text-[var(--ink)]">How this site was built</a></div>
+      <div class="mono text-xs">© 2026 Starlight</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============ floating switcher (hidden in prod builds; throwaway) ============ -->
+<div id="switch">
+  <button id="prev" aria-label="Previous variant">‹</button>
+  <span class="lbl" id="lbl">A</span>
+  <button id="next" aria-label="Next variant">›</button>
+</div>
+
+<script>
+  const META = {A:'Warm Editorial', B:'Soft Spotlight', C:'Structured Grid'};
+  const KEYS = ['A','B','C'];
+  function show(v){
+    if(!KEYS.includes(v)) v='A';
+    document.querySelectorAll('.variant').forEach(n=>n.classList.toggle('active', n.dataset.v===v));
+    document.body.setAttribute('data-v', v);
+    document.getElementById('lbl').textContent = v + ' · ' + META[v];
+    const u = new URL(location); u.searchParams.set('variant', v); history.replaceState(null,'',u);
+    window.scrollTo(0,0);
+  }
+  function cycle(d){
+    const cur = new URL(location).searchParams.get('variant') || 'A';
+    let i = KEYS.indexOf(cur); if(i<0) i=0;
+    show(KEYS[(i + d + KEYS.length) % KEYS.length]);
+  }
+  document.getElementById('prev').onclick = ()=>cycle(-1);
+  document.getElementById('next').onclick = ()=>cycle(1);
+  document.addEventListener('keydown', e=>{
+    const t = e.target.tagName; if(t==='INPUT'||t==='TEXTAREA'||e.target.isContentEditable) return;
+    if(e.key==='ArrowLeft') cycle(-1); if(e.key==='ArrowRight') cycle(1);
+  });
+  show(new URL(location).searchParams.get('variant') || 'A');
+</script>
+</body>
+</html>
