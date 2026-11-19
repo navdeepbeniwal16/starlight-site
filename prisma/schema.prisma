@@ -11,3 +11,22 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Segment {
+  launch_waitlist
+  beta_tester
+}
+
+model Signup {
+  id           String    @id @default(uuid())
+  email        String
+  segment      Segment
+  createdAt    DateTime  @default(now()) @map("created_at")
+  source       String?
+  consentAt    DateTime? @map("consent_at")
+  syncedAt     DateTime? @map("synced_at")
+  syncAttempts Int       @default(0) @map("sync_attempts")
+
+  @@unique([email, segment])
+  @@map("signup")
+}
