@@ -43,7 +43,9 @@ The app uses **two** Postgres connection strings, by design — keep both:
   `src/lib/db.ts`.
 - **`DIRECT_URL` (direct/unpooled)** — the migration connection. `prisma migrate
   deploy` issues DDL, which a pooler like PgBouncer can't carry, so it needs a
-  direct connection. Used by `prisma7.config.ts`.
+  direct connection. Used by `prisma7.config.ts`, which also reads
+  `DATABASE_URL_UNPOOLED` — the name the Neon–Vercel integration injects for the
+  direct connection (including on each preview branch).
 
 Locally and in CI there's no pooler, so `DIRECT_URL` can be left unset — migrations
 fall back to `DATABASE_URL`. In production each must point at its matching host.
