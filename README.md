@@ -16,7 +16,7 @@ merge-gating CI pipeline and deploy-on-green via Vercel.
 
 ```bash
 npm install           # postinstall runs `prisma generate`
-cp .env.example .env   # set DATABASE_URL (Postgres) and TESTFLIGHT_URL
+cp .env.example .env   # set DATABASE_URL (Postgres), TESTFLIGHT_URL, SIGNUP_FORM_SECRET
                        # DIRECT_URL is optional locally (falls back to DATABASE_URL)
 npm run dev            # http://localhost:3000
 ```
@@ -73,6 +73,23 @@ unconfigured deploys never make a real call (and tests always use a fake).
 Both endpoints are protected by the `CRON_SECRET` bearer token (Vercel injects it on
 cron invocations). Set `HUBSPOT_*` and `CRON_SECRET` in the Vercel project env vars.
 
+## Signup abuse protection
+
+Both signup forms carry proportionate, zero-friction bot defense (`src/lib/signup/abuse.ts`),
+tuned to never trip a real user — including one on assistive tech:
+
+- **Honeypot** — an off-screen, `aria-hidden` text input (never `type=hidden`) that
+  humans and screen readers skip but a form-filling bot populates.
+- **Time-trap** — each form renders an HMAC-signed timestamp (signed per request with
+  `SIGNUP_FORM_SECRET`, so the field sits outside the page's static shell). The route
+  rejects a submission with a bad/missing signature, one submitted faster than a human
+  could fill the form, or one whose token has gone stale.
+
+A tripped guard returns a **silent fake-success** — the same response a real signup
+gets — and writes no row, so a bot can't tell it was dropped. An email-syntax error
+still surfaces inline. Set `SIGNUP_FORM_SECRET` (any high-entropy string, stable across
+instances) in the Vercel project env vars.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs five jobs on every pull request (and on pushes to
@@ -98,8 +115,9 @@ These steps need Vercel/GitHub account access and are not scripted here:
 1. **Link the repo in Vercel** — import `starlight-site`, framework preset "Next.js".
    This enables PR preview URLs and production deploys on merge.
 2. **Set `DATABASE_URL`** (pooled), **`DIRECT_URL`** (direct/unpooled — see
-   [Database connections](#database-connections)), `TESTFLIGHT_URL`, the `HUBSPOT_*`
-   vars, and `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)) in the
-   Vercel project env vars.
+   [Database connections](#database-connections)), `TESTFLIGHT_URL`, `SIGNUP_FORM_SECRET`
+   (see [Signup abuse protection](#signup-abuse-protection)), the `HUBSPOT_*` vars, and
+   `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)) in the Vercel
+   project env vars.
 3. **Branch protection** — require the `lint`, `typecheck`, `unit`,
    `integration`, and `e2e` checks on `main` (also configurable via `gh api`).

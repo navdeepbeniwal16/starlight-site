@@ -1,6 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import { prisma } from "@/lib/db";
+import {
+  HONEYPOT_FIELD,
+  issueFormToken,
+  SIGNATURE_FIELD,
+  TIMESTAMP_FIELD,
+} from "@/lib/signup/abuse";
 
 // Invoked directly, the handler has no request scope, so the real after() throws.
 // Capture the tasks and run them via flushScheduled() instead.
@@ -19,7 +25,7 @@ async function flushScheduled(): Promise<void> {
 
 const ENDPOINT = "http://localhost/api/signup";
 
-function submit(fields: Record<string, string>): Promise<Response> {
+function post(fields: Record<string, string>): Promise<Response> {
   return POST(
     new Request(ENDPOINT, {
       method: "POST",
@@ -27,6 +33,17 @@ function submit(fields: Record<string, string>): Promise<Response> {
       body: new URLSearchParams(fields),
     }),
   );
+}
+
+// A genuine submission: empty honeypot and a token aged past the 2s fill floor, like a
+// real browser. The bot-trap cases call post() directly with crafted tokens.
+function submit(fields: Record<string, string>): Promise<Response> {
+  const { timestamp, signature } = issueFormToken(Date.now() - 5_000);
+  return post({
+    [TIMESTAMP_FIELD]: String(timestamp),
+    [SIGNATURE_FIELD]: String(signature),
+    ...fields,
+  });
 }
 
 function statusOf(res: Response): string | null {
@@ -94,6 +111,48 @@ describe("POST /api/signup", () => {
 
     expect(res.status).toBe(303);
     expect(statusOf(res)).toBe("invalid");
+    expect(await prisma.signup.count()).toBe(0);
+  });
+
+  it("drops a honeypot-filled submission with a silent fake-success", async () => {
+    const { timestamp, signature } = issueFormToken(Date.now() - 5_000);
+    const res = await post({
+      email: "bot@example.com",
+      segment: "launch_waitlist",
+      [TIMESTAMP_FIELD]: String(timestamp),
+      [SIGNATURE_FIELD]: String(signature),
+      [HONEYPOT_FIELD]: "http://spam.example",
+    });
+
+    expect(res.status).toBe(303);
+    expect(statusOf(res)).toBe("joined");
+    expect(await prisma.signup.count()).toBe(0);
+  });
+
+  it("drops a too-fast submission with a silent fake-success", async () => {
+    const { timestamp, signature } = issueFormToken(Date.now());
+    const res = await post({
+      email: "fast@example.com",
+      segment: "launch_waitlist",
+      [TIMESTAMP_FIELD]: String(timestamp),
+      [SIGNATURE_FIELD]: String(signature),
+    });
+
+    expect(res.status).toBe(303);
+    expect(statusOf(res)).toBe("joined");
+    expect(await prisma.signup.count()).toBe(0);
+  });
+
+  it("drops a bad-signature submission with a silent fake-success", async () => {
+    const res = await post({
+      email: "forged@example.com",
+      segment: "launch_waitlist",
+      [TIMESTAMP_FIELD]: String(Date.now() - 5_000),
+      [SIGNATURE_FIELD]: "deadbeef",
+    });
+
+    expect(res.status).toBe(303);
+    expect(statusOf(res)).toBe("joined");
     expect(await prisma.signup.count()).toBe(0);
   });
 

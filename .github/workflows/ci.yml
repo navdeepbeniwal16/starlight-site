@@ -80,6 +80,10 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    # The home page signs a per-request form token at render; without the secret the
+    # signup bot trap throws and the page fails to render.
+    env:
+      SIGNUP_FORM_SECRET: e2e-form-secret
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
