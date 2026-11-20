@@ -1,4 +1,7 @@
+import { Suspense } from "react";
 import { Segment } from "@/generated/prisma/enums";
+import { HONEYPOT_FIELD } from "@/lib/signup/abuse";
+import { SignupToken } from "./signup-token";
 
 // Intentionally minimal and unstyled; the Warm Editorial UI lands in #2 / #10.
 export function SignupForms() {
@@ -32,9 +35,23 @@ function SignupForm({
   cta: string;
 }) {
   const emailId = `${id}-email`;
+  const honeypotId = `${id}-${HONEYPOT_FIELD}`;
   return (
     <form method="post" action="/api/signup" className="flex flex-col gap-2">
       <input type="hidden" name="segment" value={segment} />
+      {/* Honeypot: off-screen and aria-hidden so neither a sighted nor an
+          assistive-tech user ever reaches it, but a form-filling bot will — any
+          value trips the guard. Deliberately a text input, not type=hidden. */}
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor={honeypotId}>Leave this field empty</label>
+        <input
+          id={honeypotId}
+          type="text"
+          name={HONEYPOT_FIELD}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
       <label htmlFor={emailId}>{label}</label>
       <input
         id={emailId}
@@ -45,6 +62,9 @@ function SignupForm({
         placeholder="you@example.com"
         className="border px-2 py-1"
       />
+      <Suspense fallback={null}>
+        <SignupToken />
+      </Suspense>
       <button type="submit" className="border px-2 py-1">
         {cta}
       </button>
