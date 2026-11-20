@@ -1,6 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import { prisma } from "@/lib/db";
+
+// Invoked directly, the handler has no request scope, so the real after() throws.
+// Capture the tasks and run them via flushScheduled() instead.
+const { scheduledTasks } = vi.hoisted(() => ({
+  scheduledTasks: [] as Array<() => unknown>,
+}));
+vi.mock("next/server", () => ({
+  after: (task: () => unknown) => {
+    scheduledTasks.push(task);
+  },
+}));
+
+async function flushScheduled(): Promise<void> {
+  for (const task of scheduledTasks.splice(0)) await task();
+}
 
 const ENDPOINT = "http://localhost/api/signup";
 
@@ -19,6 +34,15 @@ function statusOf(res: Response): string | null {
 }
 
 describe("POST /api/signup", () => {
+  beforeEach(() => {
+    scheduledTasks.length = 0;
+    // Force the no-op client even if the developer has a real token in their env.
+    vi.stubEnv("HUBSPOT_ACCESS_TOKEN", "");
+  });
+  afterAll(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("writes exactly one row with the right segment and succeeds", async () => {
     const res = await submit({
       email: "a@example.com",
@@ -97,5 +121,21 @@ describe("POST /api/signup", () => {
     expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe(process.env.TESTFLIGHT_URL);
     expect(await prisma.signup.count()).toBe(1);
+  });
+
+  it("syncs to HubSpot off the response path, not before the redirect", async () => {
+    await submit({ email: "sync@example.com", segment: "launch_waitlist" });
+
+    const before = await prisma.signup.findFirstOrThrow({
+      where: { email: "sync@example.com" },
+    });
+    expect(before.syncedAt).toBeNull();
+
+    await flushScheduled();
+
+    const after = await prisma.signup.findFirstOrThrow({
+      where: { email: "sync@example.com" },
+    });
+    expect(after.syncedAt).not.toBeNull();
   });
 });

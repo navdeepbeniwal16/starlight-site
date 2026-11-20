@@ -8,8 +8,9 @@ merge-gating CI pipeline and deploy-on-green via Vercel.
 - **Next.js 16** (App Router) + **React 19**, **TypeScript** (strict)
 - **Tailwind CSS v4**
 - **Prisma 7** (Postgres, driver adapters) — the `signup` system-of-record + migrations
+- **HubSpot** — best-effort CRM sync behind a swappable client (no-op when unconfigured)
 - **Vitest** + Testing Library (unit) and **Playwright** (E2E)
-- **Vercel** hosting + Speed Insights
+- **Vercel** hosting + Speed Insights + Cron
 
 ## Getting started
 
@@ -50,6 +51,28 @@ The app uses **two** Postgres connection strings, by design — keep both:
 Locally and in CI there's no pooler, so `DIRECT_URL` can be left unset — migrations
 fall back to `DATABASE_URL`. In production each must point at its matching host.
 
+## HubSpot sync & reconciliation
+
+The durable `signup` write is the source of truth; the CRM sync is best-effort and
+downstream of it. A swappable client (`src/lib/hubspot`) talks to HubSpot only when
+`HUBSPOT_ACCESS_TOKEN` is set — otherwise a no-op fake stands in, so local, CI, and
+unconfigured deploys never make a real call (and tests always use a fake).
+
+- **Write path** — after a signup commits, the route upserts the contact off the
+  response via Next's [`after()`](https://nextjs.org/docs/app/api-reference/functions/after).
+  A HubSpot failure never fails the user's signup; the row just persists with
+  `synced_at = null`. Upsert-by-email keeps every attempt idempotent.
+- **Cron sweep** — `vercel.json` schedules `/api/cron/sync` once daily (the Vercel
+  Hobby plan caps crons at one run per day; a shorter interval needs Pro) to re-upsert
+  `synced_at IS NULL` rows, stamping `synced_at` on success and incrementing
+  `sync_attempts` on failure. A **soft cap** (`HUBSPOT_SYNC_MAX_ATTEMPTS`, default 5)
+  stops auto-retrying a row that keeps failing, leaving it for inspection.
+- **Manual recovery** — `POST /api/resync` re-runs the same reconciliation on demand,
+  the escape hatch when a failed sync shouldn't wait for the daily sweep.
+
+Both endpoints are protected by the `CRON_SECRET` bearer token (Vercel injects it on
+cron invocations). Set `HUBSPOT_*` and `CRON_SECRET` in the Vercel project env vars.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs five jobs on every pull request (and on pushes to
@@ -75,7 +98,8 @@ These steps need Vercel/GitHub account access and are not scripted here:
 1. **Link the repo in Vercel** — import `starlight-site`, framework preset "Next.js".
    This enables PR preview URLs and production deploys on merge.
 2. **Set `DATABASE_URL`** (pooled), **`DIRECT_URL`** (direct/unpooled — see
-   [Database connections](#database-connections)), and `TESTFLIGHT_URL` in the
+   [Database connections](#database-connections)), `TESTFLIGHT_URL`, the `HUBSPOT_*`
+   vars, and `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)) in the
    Vercel project env vars.
 3. **Branch protection** — require the `lint`, `typecheck`, `unit`,
    `integration`, and `e2e` checks on `main` (also configurable via `gh api`).

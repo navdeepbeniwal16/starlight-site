@@ -1,5 +1,7 @@
+import { after } from "next/server";
 import { Segment } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/db";
+import { syncSignup } from "@/lib/hubspot/sync";
 import { testFlightUrl } from "@/lib/signup/config";
 import { isValidEmail, normalizeEmail } from "@/lib/signup/email";
 import { parseSegment } from "@/lib/signup/segment";
@@ -26,6 +28,7 @@ export async function POST(request: Request): Promise<Response> {
     return redirect(`/?status=${SIGNUP_STATUS.invalid}`, request.url);
   }
 
+  const email = normalizeEmail(rawEmail);
   const source = form.get("source");
   let created: boolean;
   try {
@@ -34,7 +37,7 @@ export async function POST(request: Request): Promise<Response> {
     const { count } = await prisma.signup.createMany({
       data: [
         {
-          email: normalizeEmail(rawEmail),
+          email,
           segment,
           source: typeof source === "string" && source.length > 0 ? source : null,
         },
@@ -46,6 +49,10 @@ export async function POST(request: Request): Promise<Response> {
     console.error("signup write failed", error);
     return redirect(`/?status=${SIGNUP_STATUS.error}`, request.url);
   }
+
+  // Unconditional, including an already-existing row, so a repeat submit can recover
+  // a previously failed sync.
+  after(() => syncSignup({ email, segment }));
 
   // Beta redirects to TestFlight whether the row was just created or already there.
   if (segment === Segment.beta_tester) {
