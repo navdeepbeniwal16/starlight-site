@@ -1,15 +1,12 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-// Form fields the trap round-trips between render and submit. The honeypot is a
-// decoy a human never sees; ts/sig carry the signed render time.
 export const HONEYPOT_FIELD = "website";
 export const TIMESTAMP_FIELD = "ts";
 export const SIGNATURE_FIELD = "sig";
 
-// A human needs at least a moment to read and fill the form; a faster submit is a
-// script. The upper bound caps how long a harvested token stays replayable while
-// still tolerating a visitor who lingers on the page.
 const MIN_FILL_MS = 2_000;
+// Kept generous: it bounds how long a harvested token stays replayable, but tightening
+// it silently drops a real visitor who lingers before submitting.
 const MAX_TOKEN_AGE_MS = 60 * 60 * 1000;
 
 function secret(): string {
@@ -36,7 +33,6 @@ export interface FormToken {
   signature: string;
 }
 
-/** issueFormToken mints a fresh signed render time for one form instance. */
 export function issueFormToken(now: number = Date.now()): FormToken {
   return { timestamp: now, signature: signTimestamp(now) };
 }
@@ -49,9 +45,8 @@ export interface Submission {
 }
 
 /**
- * isBotSubmission is the pure guard: it trips on a filled honeypot, a missing or
- * forged signature, or a timestamp that is implausibly fresh or already stale.
- * `now` is injected so the verdict stays deterministic and testable.
+ * isBotSubmission is the pure bot check; `now` is passed in rather than read from the
+ * clock so the too-fast and expiry branches stay deterministic under test.
  */
 export function isBotSubmission({
   honeypot,
@@ -61,7 +56,7 @@ export function isBotSubmission({
 }: Submission): boolean {
   if (honeypot.trim() !== "") return true;
 
-  // Reject non-numeric timestamps before Number() coerces "" or junk to a value.
+  // Guard the raw string first: Number("") is 0, which would pass as a real timestamp.
   if (!/^\d+$/.test(timestamp)) return true;
   const issuedAt = Number(timestamp);
 

@@ -21,9 +21,9 @@ function redirect(location: string, base: string): Response {
   });
 }
 
-// The response a genuine signup and a tripped bot both receive, so a bot can't
-// tell its submission was dropped. Beta goes to TestFlight whether the row was
-// just created or already there.
+// The identical response a real signup and a tripped bot both get, so a bot can't tell
+// it was dropped. `created` only splits joined/already on the launch path; beta always
+// redirects to TestFlight.
 function signupSuccess(segment: Segment, created: boolean, base: string): Response {
   if (segment === Segment.beta_tester) {
     return redirect(testFlightUrl(), base);
@@ -42,8 +42,8 @@ export async function POST(request: Request): Promise<Response> {
     return new Response("Unknown signup segment", { status: 400 });
   }
 
-  // Abuse guard runs before validation: a tripped bot gets a silent fake-success
-  // and writes no row, never the inline "invalid email" tell.
+  // Guard before email validation: a tripped bot gets the silent fake-success, never
+  // the inline "invalid email" response that would reveal the trap.
   if (
     isBotSubmission({
       honeypot: String(form.get(HONEYPOT_FIELD) ?? ""),

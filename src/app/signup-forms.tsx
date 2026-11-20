@@ -39,9 +39,8 @@ function SignupForm({
   return (
     <form method="post" action="/api/signup" className="flex flex-col gap-2">
       <input type="hidden" name="segment" value={segment} />
-      {/* Honeypot: off-screen and aria-hidden so neither a sighted nor an
-          assistive-tech user ever reaches it, but a form-filling bot will — any
-          value trips the guard. Deliberately a text input, not type=hidden. */}
+      {/* Honeypot: a decoy the markup hides from humans and assistive tech but a bot
+          fills. Deliberately a real text input — type=hidden would tip off the bot. */}
       <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
         <label htmlFor={honeypotId}>Leave this field empty</label>
         <input

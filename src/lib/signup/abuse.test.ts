@@ -38,7 +38,6 @@ describe("signTimestamp / verifyTimestamp", () => {
 describe("isBotSubmission", () => {
   const now = 1_700_000_100_000;
 
-  // A genuine, unhurried submission: empty honeypot, token minted well before now.
   function genuine() {
     const { timestamp, signature } = issueFormToken(now - 10_000);
     return { honeypot: "", timestamp: String(timestamp), signature, now };

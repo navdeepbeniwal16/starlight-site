@@ -35,8 +35,8 @@ function post(fields: Record<string, string>): Promise<Response> {
   );
 }
 
-// A genuine submission carries an empty honeypot and a signed render time past the
-// 2s fill floor, mirroring what a real browser posts.
+// A genuine submission: empty honeypot and a token aged past the 2s fill floor, like a
+// real browser. The bot-trap cases call post() directly with crafted tokens.
 function submit(fields: Record<string, string>): Promise<Response> {
   const { timestamp, signature } = issueFormToken(Date.now() - 5_000);
   return post({
@@ -124,7 +124,6 @@ describe("POST /api/signup", () => {
       [HONEYPOT_FIELD]: "http://spam.example",
     });
 
-    // Indistinguishable from a real join, but nothing is written.
     expect(res.status).toBe(303);
     expect(statusOf(res)).toBe("joined");
     expect(await prisma.signup.count()).toBe(0);

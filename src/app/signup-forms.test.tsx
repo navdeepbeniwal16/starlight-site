@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { HONEYPOT_FIELD } from "@/lib/signup/abuse";
 import { SignupForms } from "./signup-forms";
 
-// SignupToken is an async server component (it awaits connection()); stub it so the
-// jsdom client render doesn't choke on it. Its signing is covered in abuse.test.ts.
+// SignupToken is an async server component (connection()) and can't render in jsdom;
+// its signing is covered in abuse.test.ts.
 vi.mock("./signup-token", () => ({ SignupToken: () => null }));
 
 describe("SignupForms", () => {
@@ -40,10 +40,7 @@ describe("SignupForms", () => {
       .closest("form")!;
     const honeypot = form.querySelector(`input[name="${HONEYPOT_FIELD}"]`)!;
 
-    // A text input (never type=hidden) that a naive bot fills.
     expect(honeypot).toHaveAttribute("type", "text");
-    // Removed from the layout and the keyboard order, and from the a11y tree, so a
-    // real user — including one on a screen reader — can't land in it.
     expect(honeypot.closest('[aria-hidden="true"]')).not.toBeNull();
     expect(honeypot).toHaveAttribute("tabindex", "-1");
     expect(

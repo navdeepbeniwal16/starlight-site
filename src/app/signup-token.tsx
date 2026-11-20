@@ -5,10 +5,9 @@ import {
   TIMESTAMP_FIELD,
 } from "@/lib/signup/abuse";
 
-// Minted per request and kept out of the static shell: a cached signature would be
-// stale by the time a visitor submits and would wrongly trip the time-trap. Render
-// inside a <Suspense> boundary so only this hole waits for the request.
 export async function SignupToken() {
+  // Keeps the signature out of the static shell: a prerendered token would be stale on
+  // submit and wrongly trip the trap. Needs a <Suspense> ancestor (Cache Components).
   await connection();
   const { timestamp, signature } = issueFormToken();
   return (
