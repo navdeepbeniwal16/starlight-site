@@ -12,9 +12,6 @@ export interface HubspotClient {
   upsertContact(contact: HubspotContact): Promise<void>;
 }
 
-// The real client only when a token is configured; everywhere else — local dev,
-// CI, tests, unconfigured previews — a no-op, so nothing reaches HubSpot by
-// accident. The seam lets tests swap in a fake without touching the network.
 export function getHubspotClient(): HubspotClient {
   const token = process.env.HUBSPOT_ACCESS_TOKEN;
   return token ? createHubspotApiClient(token) : noopHubspotClient;

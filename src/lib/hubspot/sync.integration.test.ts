@@ -4,8 +4,6 @@ import { prisma } from "@/lib/db";
 import type { HubspotClient, HubspotContact } from "./client";
 import { reconcile, syncSignup } from "./sync";
 
-// A controllable fake standing in for HubSpot: records every upsert and, when
-// asked, throws to exercise the failure paths.
 function fakeClient(opts: { fail?: boolean } = {}): HubspotClient & {
   calls: HubspotContact[];
 } {

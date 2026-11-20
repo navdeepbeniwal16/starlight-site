@@ -50,9 +50,8 @@ export async function POST(request: Request): Promise<Response> {
     return redirect(`/?status=${SIGNUP_STATUS.error}`, request.url);
   }
 
-  // Sync to HubSpot after the response is sent: a failure leaves synced_at = null
-  // for the cron sweep and never costs the user their signup. Re-run on an existing
-  // row too, so a repeat submit can recover a previously failed sync.
+  // Unconditional, including an already-existing row, so a repeat submit can recover
+  // a previously failed sync.
   after(() => syncSignup({ email, segment }));
 
   // Beta redirects to TestFlight whether the row was just created or already there.

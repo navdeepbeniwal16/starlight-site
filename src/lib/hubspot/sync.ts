@@ -6,9 +6,8 @@ import {
 } from "./client";
 import { MAX_SYNC_ATTEMPTS } from "./config";
 
-// Best-effort CRM sync, run off the response path via after(). A failure just
-// leaves synced_at = null for the cron sweep to reconcile; the signup already
-// committed, so never rethrow — this runs after the response is sent.
+// Runs in after(), past the sent response, so never rethrow: a failure just leaves
+// synced_at = null for the cron sweep to reconcile.
 export async function syncSignup(
   contact: HubspotContact,
   client: HubspotClient = getHubspotClient(),
@@ -34,10 +33,8 @@ export interface ReconcileResult {
   failed: number;
 }
 
-// Sweep un-synced rows and re-upsert them: the recovery path for signups whose
-// write-path sync failed. Stamps synced_at on success, increments sync_attempts on
-// failure, and skips rows past the soft cap so a permanently broken row is left for
-// manual inspection instead of being retried forever. Drives the cron and /api/resync.
+// Recovery sweep for signups whose write-path sync failed. The soft cap bounds the
+// retries: rows at or past it are skipped, not retried forever.
 export async function reconcile(
   client: HubspotClient = getHubspotClient(),
   maxAttempts: number = MAX_SYNC_ATTEMPTS,

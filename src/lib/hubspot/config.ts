@@ -2,11 +2,8 @@ import { Segment } from "@/generated/prisma/enums";
 
 const DEFAULT_MAX_SYNC_ATTEMPTS = 5;
 
-// Soft retry cap: once a row has failed this many times, the cron sweep stops
-// auto-retrying it and leaves it for manual inspection via /api/resync.
 export const MAX_SYNC_ATTEMPTS = resolveMaxAttempts();
 
-/** Each signup path maps to exactly one HubSpot list ("segment"). */
 export function listIdForSegment(segment: Segment): string | undefined {
   switch (segment) {
     case Segment.launch_waitlist:

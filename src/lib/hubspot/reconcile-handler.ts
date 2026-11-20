@@ -1,8 +1,7 @@
 import { reconcile } from "./sync";
 
-// Vercel sets `Authorization: Bearer <CRON_SECRET>` on cron invocations; the same
-// secret guards the manual /api/resync path. Fail closed when it's unset, so an
-// unconfigured deploy never exposes an open reconciliation trigger.
+// Vercel sends `Authorization: Bearer <CRON_SECRET>` on cron invocations; the same
+// secret guards /api/resync. Fail closed when it's unset.
 function authorized(request: Request): boolean {
   const secret = process.env.CRON_SECRET;
   return (
@@ -11,7 +10,6 @@ function authorized(request: Request): boolean {
   );
 }
 
-/** Shared handler behind the Vercel Cron sweep and /api/resync. */
 export async function handleReconcile(request: Request): Promise<Response> {
   if (!authorized(request)) {
     return new Response("Unauthorized", { status: 401 });

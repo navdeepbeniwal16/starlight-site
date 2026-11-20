@@ -2,9 +2,8 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import { prisma } from "@/lib/db";
 
-// Capture after() tasks instead of deferring them: calling the handler directly
-// has no request scope, so the real after() would throw. The test drives the
-// captured sync explicitly via flushScheduled().
+// Invoked directly, the handler has no request scope, so the real after() throws.
+// Capture the tasks and run them via flushScheduled() instead.
 const { scheduledTasks } = vi.hoisted(() => ({
   scheduledTasks: [] as Array<() => unknown>,
 }));
@@ -37,7 +36,7 @@ function statusOf(res: Response): string | null {
 describe("POST /api/signup", () => {
   beforeEach(() => {
     scheduledTasks.length = 0;
-    // Force the no-op HubSpot client regardless of the developer's environment.
+    // Force the no-op client even if the developer has a real token in their env.
     vi.stubEnv("HUBSPOT_ACCESS_TOKEN", "");
   });
   afterAll(() => {
@@ -127,7 +126,6 @@ describe("POST /api/signup", () => {
   it("syncs to HubSpot off the response path, not before the redirect", async () => {
     await submit({ email: "sync@example.com", segment: "launch_waitlist" });
 
-    // The row commits un-synced; only the deferred after() task stamps it.
     const before = await prisma.signup.findFirstOrThrow({
       where: { email: "sync@example.com" },
     });
