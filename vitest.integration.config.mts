@@ -15,6 +15,7 @@ export default defineConfig({
     fileParallelism: false,
     env: {
       TESTFLIGHT_URL: "https://testflight.apple.com/join/TESTSTUB",
+      SIGNUP_FORM_SECRET: "integration-secret",
     },
   },
 });
