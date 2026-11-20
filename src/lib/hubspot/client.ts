@@ -1,6 +1,5 @@
 import { Segment } from "@/generated/prisma/enums";
 import { createHubspotApiClient } from "./api";
-import { hubspotAccessToken } from "./config";
 import { noopHubspotClient } from "./noop";
 
 export interface HubspotContact {
@@ -17,6 +16,6 @@ export interface HubspotClient {
 // CI, tests, unconfigured previews — a no-op, so nothing reaches HubSpot by
 // accident. The seam lets tests swap in a fake without touching the network.
 export function getHubspotClient(): HubspotClient {
-  const token = hubspotAccessToken();
+  const token = process.env.HUBSPOT_ACCESS_TOKEN;
   return token ? createHubspotApiClient(token) : noopHubspotClient;
 }

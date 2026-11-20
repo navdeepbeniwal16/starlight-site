@@ -6,11 +6,6 @@ const DEFAULT_MAX_SYNC_ATTEMPTS = 5;
 // auto-retrying it and leaves it for manual inspection via /api/resync.
 export const MAX_SYNC_ATTEMPTS = resolveMaxAttempts();
 
-/** The HubSpot private-app token, or undefined when HubSpot is unconfigured. */
-export function hubspotAccessToken(): string | undefined {
-  return process.env.HUBSPOT_ACCESS_TOKEN || undefined;
-}
-
 /** Each signup path maps to exactly one HubSpot list ("segment"). */
 export function listIdForSegment(segment: Segment): string | undefined {
   switch (segment) {
