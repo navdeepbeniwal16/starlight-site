@@ -9,9 +9,13 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Migrations issue DDL, which a connection pooler can't carry, so they run on
-    // the direct (unpooled) connection. Falls back to DATABASE_URL where one
-    // direct connection serves both roles (local dev, CI, throwaway Postgres).
-    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
+    // Migrations issue DDL, which a connection pooler can't carry, so they use a
+    // direct (unpooled) connection. DATABASE_URL_UNPOOLED is the Neon–Vercel
+    // integration's name for it. Falls back to DATABASE_URL where there's no pooler
+    // and one connection serves both roles (local dev, CI, throwaway Postgres).
+    url:
+      process.env["DIRECT_URL"] ??
+      process.env["DATABASE_URL_UNPOOLED"] ??
+      process.env["DATABASE_URL"],
   },
 });
