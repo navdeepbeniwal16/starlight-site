@@ -62,11 +62,13 @@ unconfigured deploys never make a real call (and tests always use a fake).
   response via Next's [`after()`](https://nextjs.org/docs/app/api-reference/functions/after).
   A HubSpot failure never fails the user's signup; the row just persists with
   `synced_at = null`. Upsert-by-email keeps every attempt idempotent.
-- **Cron sweep** — `vercel.json` schedules `/api/cron/sync` (~every 15 min) to
-  re-upsert `synced_at IS NULL` rows, stamping `synced_at` on success and
-  incrementing `sync_attempts` on failure. A **soft cap** (`HUBSPOT_SYNC_MAX_ATTEMPTS`,
-  default 5) stops auto-retrying a row that keeps failing, leaving it for inspection.
-- **Manual recovery** — `POST /api/resync` re-runs the same reconciliation on demand.
+- **Cron sweep** — `vercel.json` schedules `/api/cron/sync` once daily (the Vercel
+  Hobby plan caps crons at one run per day; a shorter interval needs Pro) to re-upsert
+  `synced_at IS NULL` rows, stamping `synced_at` on success and incrementing
+  `sync_attempts` on failure. A **soft cap** (`HUBSPOT_SYNC_MAX_ATTEMPTS`, default 5)
+  stops auto-retrying a row that keeps failing, leaving it for inspection.
+- **Manual recovery** — `POST /api/resync` re-runs the same reconciliation on demand,
+  the escape hatch when a failed sync shouldn't wait for the daily sweep.
 
 Both endpoints are protected by the `CRON_SECRET` bearer token (Vercel injects it on
 cron invocations). Set `HUBSPOT_*` and `CRON_SECRET` in the Vercel project env vars.
