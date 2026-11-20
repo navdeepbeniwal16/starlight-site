@@ -9,6 +9,7 @@ merge-gating CI pipeline and deploy-on-green via Vercel.
 - **Tailwind CSS v4**
 - **Prisma 7** (Postgres, driver adapters) — the `signup` system-of-record + migrations
 - **HubSpot** — best-effort CRM sync behind a swappable client (no-op when unconfigured)
+- **Sanity** — structured-singleton CMS for the landing page, with Studio at `/studio`
 - **Vitest** + Testing Library (unit) and **Playwright** (E2E)
 - **Vercel** hosting + Speed Insights + Cron
 
@@ -18,6 +19,7 @@ merge-gating CI pipeline and deploy-on-green via Vercel.
 npm install           # postinstall runs `prisma generate`
 cp .env.example .env   # set DATABASE_URL (Postgres), TESTFLIGHT_URL, SIGNUP_FORM_SECRET
                        # DIRECT_URL is optional locally (falls back to DATABASE_URL)
+                       # Sanity vars are optional locally (site uses static copy)
 npm run dev            # http://localhost:3000
 ```
 
@@ -90,6 +92,28 @@ gets — and writes no row, so a bot can't tell it was dropped. An email-syntax 
 still surfaces inline. Set `SIGNUP_FORM_SECRET` (any high-entropy string, stable across
 instances) in the Vercel project env vars.
 
+## Content (Sanity CMS)
+
+The landing page is a **structured singleton**, not a page builder: code owns which
+sections exist and their order (`src/sanity/schemaTypes`), Sanity owns the copy and
+media inside each. Two pinned singletons — `landingPage` and `siteSettings` — are
+edited in the embedded **Studio at `/studio`**, so an editor changes marketing copy,
+media, and the TestFlight link with no deploy.
+
+- **Typed fetch layer** (`src/sanity/lib`) — hand-written types mirror the GROQ
+  projections; `getLandingPage()` / `getSiteSettings()` are the only entry points.
+  Both **return `null` when Sanity isn't configured** (no `NEXT_PUBLIC_SANITY_PROJECT_ID`),
+  so local and CI builds fall back to the static copy in `src/lib/site.ts` instead of
+  failing — the same no-op posture as the HubSpot client.
+- **Validation** — every image requires alt text, display-critical strings carry soft
+  max-length warnings, and `howItWorks` must have 2–4 steps.
+- **ISR + webhook** — reads are cached (`use cache` + a long `cacheLife`) and tagged
+  `sanity:content`. Publishing fires a Sanity webhook to `POST /api/revalidate`, which
+  verifies the `SANITY_REVALIDATE_SECRET` HMAC signature and calls `revalidateTag`, so
+  the live page refreshes without a timer or a redeploy.
+- **`testFlightUrl`** lives once in `siteSettings`; the `TESTFLIGHT_URL` env var is only
+  the fallback for when Sanity isn't configured.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs five jobs on every pull request (and on pushes to
@@ -116,8 +140,13 @@ These steps need Vercel/GitHub account access and are not scripted here:
    This enables PR preview URLs and production deploys on merge.
 2. **Set `DATABASE_URL`** (pooled), **`DIRECT_URL`** (direct/unpooled — see
    [Database connections](#database-connections)), `TESTFLIGHT_URL`, `SIGNUP_FORM_SECRET`
-   (see [Signup abuse protection](#signup-abuse-protection)), the `HUBSPOT_*` vars, and
-   `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)) in the Vercel
-   project env vars.
-3. **Branch protection** — require the `lint`, `typecheck`, `unit`,
+   (see [Signup abuse protection](#signup-abuse-protection)), the `HUBSPOT_*` vars,
+   `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)), and the
+   `NEXT_PUBLIC_SANITY_*` + `SANITY_REVALIDATE_SECRET` vars (see [Content](#content-sanity-cms))
+   in the Vercel project env vars.
+3. **Create the Sanity project & publish webhook** — create a project with a
+   `production` dataset, set its id as `NEXT_PUBLIC_SANITY_PROJECT_ID`, and add a Sanity
+   webhook (on publish) that POSTs to `/api/revalidate` with the shared
+   `SANITY_REVALIDATE_SECRET`. See [Content](#content-sanity-cms).
+4. **Branch protection** — require the `lint`, `typecheck`, `unit`,
    `integration`, and `e2e` checks on `main` (also configurable via `gh api`).
