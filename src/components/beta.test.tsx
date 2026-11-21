@@ -22,7 +22,6 @@ describe("Beta", () => {
 
     const button = screen.getByRole("button", { name: "Join on TestFlight" });
     expect(button).toHaveAttribute("value", "beta_tester");
-    // The spotlight band is the one dark section.
     expect(container.querySelector("section")).toHaveClass("bg-ink");
   });
 

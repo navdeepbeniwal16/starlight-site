@@ -18,9 +18,7 @@ export const siteConfig = {
   },
   footer: {
     tagline: "Turn an endless to-do list into a focused day.",
-    // Used when siteSettings has no supportEmail (local/CI, or before it's filled in).
     supportEmail: "hello@starlight.app",
-    // "How this site was built" points at the public repo behind this very page.
     builtUrl: "https://github.com/navdeepbeniwal16/starlight-site",
   },
   finalCta: {

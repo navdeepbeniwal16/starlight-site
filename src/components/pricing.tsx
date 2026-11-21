@@ -21,8 +21,7 @@ export function Pricing({
         <h2 className="font-display text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
           {heading}
         </h2>
-        {/* The price point is a fixed product fact (free in beta), so it lives in code
-            rather than the editable copy. */}
+        {/* The pricing document has no price field; this comes from code, not the CMS. */}
         <p className="font-display text-6xl text-gold-ink">
           {siteConfig.pricing.price}
           <span className="ml-3 align-middle text-base font-normal text-muted">

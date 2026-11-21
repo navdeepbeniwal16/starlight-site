@@ -12,8 +12,8 @@ async function renderHome() {
   );
 }
 
-// The hero is always the first <section>; the beta band and final CTA repeat its CTA
-// labels, so hero assertions scope here rather than querying the whole page.
+// The beta band and final CTA repeat the hero's CTA labels, so hero assertions scope
+// to the first <section>.
 function hero(container: HTMLElement) {
   return within(container.querySelector("section")!);
 }

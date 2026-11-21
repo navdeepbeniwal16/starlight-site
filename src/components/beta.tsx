@@ -5,9 +5,6 @@ import { Eyebrow } from "./eyebrow";
 import { Section } from "./section";
 import { SignupForm } from "./signup-form";
 
-// The single dark "spotlight" band. Its beta submit commits then 303s to TestFlight —
-// the route handles the redirect, so this is the same form as elsewhere, just styled
-// for the dark band and pinned to the beta segment.
 export function Beta({ content }: { content: BetaContent | null }) {
   const heading = content?.heading ?? siteConfig.beta.heading;
   const body = content?.body ?? siteConfig.beta.body;

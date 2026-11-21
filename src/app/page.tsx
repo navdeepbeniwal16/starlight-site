@@ -13,7 +13,6 @@ import { getLandingPage, getSiteSettings } from "@/sanity/lib/fetch";
 import { SignupStatus } from "./signup-status";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  // Both are cached singleton fetches, so resolve them together.
   const [page, settings] = await Promise.all([
     getLandingPage(),
     getSiteSettings(),
@@ -84,9 +83,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           }
         })}
 
-        {/* The conversion run always renders (it's the page's reason for existing), so
-            it falls back to static copy rather than disappearing when the CMS is empty.
-            The dark beta band resets the rhythm, so the rest restarts from paper. */}
+        {/* Unlike the story sections above, the conversion run renders unconditionally,
+            falling back to static copy when the CMS is empty. */}
         <Beta content={page?.beta ?? null} />
         <Pricing content={page?.pricing ?? null} tone="paper" rule />
         <Faq content={page?.faq ?? null} tone="beige" rule />

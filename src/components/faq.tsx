@@ -26,7 +26,6 @@ export function Faq({
       </h2>
       <div className="mt-10 divide-y divide-hairline border-t border-hairline">
         {items.map(({ question, answer }) => (
-          // <details> gives an accessible, JS-free accordion the server can render whole.
           <details key={question} className="group py-5">
             <summary className="flex cursor-pointer items-center justify-between gap-4 font-display text-lg text-ink marker:content-['']">
               {question}

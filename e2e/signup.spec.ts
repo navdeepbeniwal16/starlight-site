@@ -4,8 +4,8 @@ import { test, expect, type Locator } from "@playwright/test";
 // submission has to wait past that fill floor before clicking.
 const FILL_FLOOR_MS = 2_100;
 
-// Fill one section's signup form like a human: email, consent, then wait out the fill
-// floor. The per-request token is streamed in, so wait for it before the clock starts.
+// The per-request token streams in after load, so wait for it before starting the
+// fill-floor clock.
 async function fillSignup(section: Locator, email: string): Promise<void> {
   await section.locator('input[name="email"]').fill(email);
   await section.getByRole("checkbox").check();
@@ -30,7 +30,6 @@ test("waitlist signup succeeds, and a repeat shows already-on-list", async ({
     page.locator("#notify").getByText(/you're on the list/i),
   ).toBeVisible();
 
-  // Same email again → the handler dedups and reports already-on-list.
   const repeat = page.locator("#notify");
   await fillSignup(repeat, email);
   await repeat.getByRole("button", { name: /notify me/i }).click();

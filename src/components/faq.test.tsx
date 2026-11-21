@@ -4,7 +4,6 @@ import { siteConfig } from "@/lib/site";
 import type { Faq as FaqContent } from "@/sanity/lib/types";
 import { Faq } from "./faq";
 
-// A single Portable Text block, matching the shape the GROQ projection returns.
 const block = (text: string): FaqContent["items"][number]["answer"] => [
   {
     _type: "block",

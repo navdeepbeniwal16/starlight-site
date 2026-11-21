@@ -95,8 +95,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      # The production build migrates this database and the signup flow reads/writes it,
-      # so the E2E exercises the real stack end to end.
+      # The build migrates this database and the signup flow reads and writes it.
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/starlight_test?schema=public
       # The home page signs a per-request form token at render; without the secret the
       # signup bot trap throws and the page fails to render.

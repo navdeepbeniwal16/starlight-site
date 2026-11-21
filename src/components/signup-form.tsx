@@ -15,8 +15,7 @@ function buttonClass(
 ): string {
   const base =
     "inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors sm:w-auto";
-  // Gold fills the primary button with ink text for AA contrast on either band; it's
-  // never the text colour. The outlined secondary flips to a light border on dark.
+  // Gold fills the primary button with ink text for AA contrast; it's never the text colour.
   if (variant === "primary") {
     return `${base} bg-gold text-ink hover:bg-gold-ink hover:text-paper`;
   }
@@ -36,10 +35,8 @@ export function SignupForm({
 }: {
   id: string;
   actions: SignupAction[];
-  // Attribution for which form the signup came from (hero, beta, final CTA); the route
-  // stores it verbatim.
+  // Stored verbatim by the signup route as the signup's source column.
   source?: string;
-  // Light text for the consent note and outlined button when the form sits on a dark band.
   onDark?: boolean;
   consentLabel?: string;
 }) {

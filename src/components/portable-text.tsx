@@ -4,8 +4,8 @@ import {
 } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/react";
 
-// The content model (minimalPortableText) only emits normal blocks, bold/italic marks,
-// and links, so those are the only cases that need styling here.
+// minimalPortableText only emits normal blocks, bold/italic marks, and links, so those
+// are the only cases handled here.
 const components: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
@@ -14,7 +14,6 @@ const components: PortableTextComponents = {
   },
   marks: {
     link: ({ children, value }) => (
-      // Editor links are arbitrary URLs, so treat them all as external and keep the tab.
       <a
         href={value?.href}
         target="_blank"

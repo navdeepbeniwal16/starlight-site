@@ -142,7 +142,6 @@ describe("Home story & feature sections", () => {
       "beige",
       "paper",
     ]);
-    // The beta band is the single dark spotlight.
     expect(sections.filter((node) => tone(node) === "ink")).toHaveLength(1);
   });
 
@@ -155,10 +154,8 @@ describe("Home story & feature sections", () => {
     });
     await renderHome();
 
-    // Story headings are gone...
     expect(screen.queryByRole("heading", { name: "The plan" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Built in public" })).toBeNull();
-    // ...but the hero and the always-on conversion sections remain.
     expect(
       screen.getByRole("heading", { level: 1, name: landingPage.hero.heading }),
     ).toBeInTheDocument();

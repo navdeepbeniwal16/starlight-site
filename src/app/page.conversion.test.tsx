@@ -2,8 +2,8 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { siteConfig } from "@/lib/site";
 
-// Drive the page through the typed fetch layer with Sanity unconfigured, so the
-// conversion run (beta → footer) renders from static fallbacks — the shape CI deploys.
+// Sanity unconfigured, so the conversion run renders from static fallbacks — the shape
+// CI deploys and the one this test pins.
 const { getLandingPage, getSiteSettings } = vi.hoisted(() => ({
   getLandingPage: vi.fn().mockResolvedValue(null),
   getSiteSettings: vi.fn().mockResolvedValue(null),

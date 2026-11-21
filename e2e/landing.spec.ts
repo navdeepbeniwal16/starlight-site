@@ -10,10 +10,9 @@ test("landing page renders the hero and a footer whose links resolve", async ({
 
   const hero = page.locator("section").first();
   await expect(hero.getByRole("heading", { level: 1 })).toBeVisible();
-  // The hero's dual CTA, whatever the two labels end up being.
   await expect(hero.getByRole("button")).toHaveCount(2);
 
-  // Footer links are wired in code (not the CMS), so their targets are fixed.
+  // Footer link targets are wired in code, not the CMS, so they're safe to assert exactly.
   const footer = page.getByRole("contentinfo");
   await expect(footer.getByRole("link", { name: "Privacy" })).toHaveAttribute(
     "href",

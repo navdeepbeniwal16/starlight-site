@@ -5,8 +5,6 @@ import type { FinalCta as FinalCtaContent } from "@/sanity/lib/types";
 import { Section } from "./section";
 import { SignupForm } from "./signup-form";
 
-// The closing waitlist capture. Its submit redirects back to `/?status=…`; the page
-// passes the matching status banner in as `status`, so the success state lands here.
 export function FinalCta({
   content,
   status,
