@@ -14,9 +14,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const howItWorks = page?.howItWorks ?? null;
   const projects = page?.projects ?? null;
 
-  // The story reads top-to-bottom from Sanity: the feature beats, then the steps, then
-  // the showcase. Assembling them as one ordered list lets the band tone alternate
-  // continuously from the paper hero regardless of which sections an editor filled in.
+  // Flattening the sections into one list keeps the paper↔beige rhythm continuous from
+  // the hero even when an editor leaves a section empty; fixed per-section tones would
+  // double a band whenever one is missing.
   const sections = [
     ...featureSections.map((section, index) => ({
       kind: "feature" as const,
@@ -51,7 +51,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           }
         />
         {sections.map((entry, index) => {
-          // Hero is paper, so the first band below it is beige; a hairline rules each.
+          // Hero is paper, so the bands below alternate starting from beige.
           const tone = index % 2 === 0 ? "beige" : "paper";
           switch (entry.kind) {
             case "feature":

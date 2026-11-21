@@ -43,7 +43,6 @@ describe("MediaFrame", () => {
       "https://cdn.sanity.io/images/poster.jpg",
     );
     expect(video?.querySelector("source")).toHaveAttribute("src", media.videoUrl);
-    // The still image is not also rendered when the clip is present.
     expect(screen.queryByRole("img")).toBeNull();
   });
 

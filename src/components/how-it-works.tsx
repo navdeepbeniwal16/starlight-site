@@ -1,8 +1,6 @@
 import type { HowItWorks as HowItWorksContent } from "@/sanity/lib/types";
 import { Section } from "./section";
 
-// The Dump → Shape → Plan steps. An ordered list with visible numerals so the sequence
-// still reads once the columns stack on mobile.
 export function HowItWorks({
   content,
   tone = "beige",

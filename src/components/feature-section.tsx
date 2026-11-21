@@ -3,9 +3,6 @@ import { Eyebrow } from "./eyebrow";
 import { MediaFrame } from "./media-frame";
 import { Section } from "./section";
 
-// One story beat: copy beside a device-framed clip or screenshot. `flip` moves the
-// media to the left on wide screens so successive beats alternate sides; on mobile the
-// copy always leads and the media stacks under it, keeping one idea per screen.
 export function FeatureSection({
   section,
   flip = false,

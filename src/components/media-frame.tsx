@@ -3,9 +3,6 @@ import { urlForImage } from "@/sanity/lib/image";
 import type { FeatureMedia } from "@/sanity/lib/types";
 import { DeviceFrame } from "./device-frame";
 
-// The media rule for every section: play the clip when one is set, otherwise show the
-// still. The clip reuses the still as its `poster`, so a section can gain a video in
-// Sanity with no code change and the poster keeps standing in until it loads.
 export function MediaFrame({
   media,
   sizes = "(min-width: 768px) 20rem, 18rem",
@@ -24,7 +21,6 @@ export function MediaFrame({
         <video
           className="h-full w-full object-cover"
           poster={posterUrl ?? undefined}
-          // A muted, looping clip autoplays as decoration; the poster alt names the scene.
           aria-label={media.image.alt}
           autoPlay
           muted

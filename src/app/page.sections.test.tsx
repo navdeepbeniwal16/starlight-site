@@ -106,7 +106,6 @@ describe("Home story & feature sections", () => {
     getLandingPage.mockResolvedValue(landingPage);
     const { container } = await renderHome();
 
-    // Three feature beats carry clips; the screenshot sections fall back to a still.
     expect(container.querySelectorAll("video")).toHaveLength(3);
     expect(
       screen.getByRole("img", { name: "Work your day screenshot" }),
@@ -124,7 +123,6 @@ describe("Home story & feature sections", () => {
       node.classList.contains("bg-beige") ? "beige" : "paper",
     );
 
-    // Hero (paper) then six bands that flip beige/paper with no two adjacent alike.
     expect(tones).toEqual([
       "paper",
       "beige",

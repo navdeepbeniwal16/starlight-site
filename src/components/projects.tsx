@@ -3,9 +3,6 @@ import { Eyebrow } from "./eyebrow";
 import { MediaFrame } from "./media-frame";
 import { Section } from "./section";
 
-// Showcased projects: an intro, then a grid of device-framed stills. Each item carries
-// the same media shape as a feature section, so a project can gain a clip like any
-// other section.
 export function Projects({
   content,
   tone = "paper",
