@@ -16,6 +16,11 @@ export const siteConfig = {
     cta: "Get the iOS beta",
     footnote: "Beta testers keep six months free at launch — no credit card.",
   },
+  finalCta: {
+    heading: "Be first to know at launch",
+    body: "Drop your email and we'll tell you the moment Starlight is ready for you.",
+    cta: "Notify me at launch",
+  },
   pricing: {
     heading: "Pricing",
     price: "Free",
