@@ -9,6 +9,12 @@ export const siteConfig = {
   betaCta: "Get the iOS beta",
   waitlistCta: "Notify me at launch",
   ctaFootnote: "Free during the beta — no credit card, unsubscribe anytime.",
+  pricing: {
+    heading: "Pricing",
+    price: "Free",
+    body: "Starlight is free for everyone while we're in beta. Testers keep six months free when we launch.",
+    note: "No credit card, no catch — just help us make it great.",
+  },
   faq: {
     heading: "Before you ask",
     items: [
