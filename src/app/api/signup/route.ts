@@ -66,6 +66,9 @@ export async function POST(request: Request): Promise<Response> {
 
   const email = normalizeEmail(rawEmail);
   const source = form.get("source");
+  // Stamped when the submit-time consent box is ticked; it's the lawful basis a later
+  // ticket needs before identifying the person downstream.
+  const consentAt = form.get("consent") === "true" ? new Date() : null;
   let created: boolean;
   try {
     // skipDuplicates compiles to ON CONFLICT DO NOTHING; count is 0 when the
@@ -76,6 +79,7 @@ export async function POST(request: Request): Promise<Response> {
           email,
           segment,
           source: typeof source === "string" && source.length > 0 ? source : null,
+          consentAt,
         },
       ],
       skipDuplicates: true,
