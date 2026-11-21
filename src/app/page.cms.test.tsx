@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { siteConfig } from "@/lib/site";
 import type { LandingPage } from "@/sanity/lib/types";
@@ -6,8 +6,11 @@ import type { LandingPage } from "@/sanity/lib/types";
 // Mock the typed fetch layer so this test proves the page renders content pulled
 // through getLandingPage() — the smoke render the ticket asks for — without a live
 // Sanity project.
-const { getLandingPage } = vi.hoisted(() => ({ getLandingPage: vi.fn() }));
-vi.mock("@/sanity/lib/fetch", () => ({ getLandingPage }));
+const { getLandingPage, getSiteSettings } = vi.hoisted(() => ({
+  getLandingPage: vi.fn(),
+  getSiteSettings: vi.fn().mockResolvedValue(null),
+}));
+vi.mock("@/sanity/lib/fetch", () => ({ getLandingPage, getSiteSettings }));
 
 import Home from "./page";
 
@@ -48,18 +51,21 @@ describe("Home with CMS content", () => {
   it("renders hero copy and the dual CTA fetched through the typed layer", async () => {
     getLandingPage.mockResolvedValue(landingPage);
 
-    await renderHome();
+    const { container } = await renderHome();
+    // The CTA labels and eyebrow also appear in the beta/final bands, so scope to the
+    // hero section.
+    const inHero = within(container.querySelector("section")!);
 
     expect(
-      screen.getByRole("heading", { level: 1, name: hero.heading }),
+      inHero.getByRole("heading", { level: 1, name: hero.heading }),
     ).toBeInTheDocument();
-    expect(screen.getByText(hero.subheading)).toBeInTheDocument();
-    expect(screen.getByText(hero.eyebrow)).toBeInTheDocument();
+    expect(inHero.getByText(hero.subheading)).toBeInTheDocument();
+    expect(inHero.getByText(hero.eyebrow)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: hero.cta[0].label }),
+      inHero.getByRole("button", { name: hero.cta[0].label }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: hero.cta[1].label }),
+      inHero.getByRole("button", { name: hero.cta[1].label }),
     ).toBeInTheDocument();
   });
 
@@ -71,6 +77,7 @@ describe("Home with CMS content", () => {
     expect(
       screen.getByRole("heading", { name: siteConfig.tagline }),
     ).toBeInTheDocument();
-    expect(screen.getByText(siteConfig.name)).toBeInTheDocument();
+    // The lockup sits in both the header and the footer.
+    expect(screen.getAllByText(siteConfig.name).length).toBeGreaterThan(0);
   });
 });

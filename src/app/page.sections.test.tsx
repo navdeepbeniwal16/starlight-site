@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { siteConfig } from "@/lib/site";
 import type {
   FeatureSection,
   ImageWithAlt,
@@ -9,8 +10,11 @@ import type {
 
 // Drive the page from the typed fetch layer, with next/image and the Sanity image
 // builder stubbed so the device-framed media renders under jsdom.
-const { getLandingPage } = vi.hoisted(() => ({ getLandingPage: vi.fn() }));
-vi.mock("@/sanity/lib/fetch", () => ({ getLandingPage }));
+const { getLandingPage, getSiteSettings } = vi.hoisted(() => ({
+  getLandingPage: vi.fn(),
+  getSiteSettings: vi.fn().mockResolvedValue(null),
+}));
+vi.mock("@/sanity/lib/fetch", () => ({ getLandingPage, getSiteSettings }));
 vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) =>
     createElement("img", { src, alt }),
@@ -84,7 +88,7 @@ async function renderHome() {
 describe("Home story & feature sections", () => {
   beforeEach(() => getLandingPage.mockReset());
 
-  it("renders all six sections in source order below the hero", async () => {
+  it("renders all six story sections in source order below the hero", async () => {
     getLandingPage.mockResolvedValue(landingPage);
     await renderHome();
 
@@ -92,7 +96,8 @@ describe("Home story & feature sections", () => {
       .getAllByRole("heading", { level: 2 })
       .map((node) => node.textContent);
 
-    expect(headings).toEqual([
+    // The always-on conversion run (beta, pricing, FAQ, final CTA) trails these.
+    expect(headings.slice(0, 6)).toEqual([
       "The plan",
       "Bring your backlog",
       "Shape your day",
@@ -115,15 +120,20 @@ describe("Home story & feature sections", () => {
     ).toBeInTheDocument();
   });
 
-  it("alternates band tone from the paper hero down the page", async () => {
+  it("alternates band tone from the paper hero down the story sections", async () => {
     getLandingPage.mockResolvedValue(landingPage);
     const { container } = await renderHome();
 
-    const tones = Array.from(container.querySelectorAll("section")).map((node) =>
-      node.classList.contains("bg-beige") ? "beige" : "paper",
-    );
+    const sections = Array.from(container.querySelectorAll("section"));
+    const tone = (node: Element) =>
+      node.classList.contains("bg-ink")
+        ? "ink"
+        : node.classList.contains("bg-beige")
+          ? "beige"
+          : "paper";
 
-    expect(tones).toEqual([
+    // Hero plus the six story sections alternate paper↔beige.
+    expect(sections.slice(0, 7).map(tone)).toEqual([
       "paper",
       "beige",
       "paper",
@@ -132,9 +142,10 @@ describe("Home story & feature sections", () => {
       "beige",
       "paper",
     ]);
+    expect(sections.filter((node) => tone(node) === "ink")).toHaveLength(1);
   });
 
-  it("renders only the hero when the CMS has no story sections", async () => {
+  it("drops the story sections but keeps the conversion run when the CMS has none", async () => {
     getLandingPage.mockResolvedValue({
       ...landingPage,
       featureSections: null,
@@ -143,9 +154,13 @@ describe("Home story & feature sections", () => {
     });
     await renderHome();
 
-    expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "The plan" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Built in public" })).toBeNull();
     expect(
       screen.getByRole("heading", { level: 1, name: landingPage.hero.heading }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: siteConfig.beta.heading }),
     ).toBeInTheDocument();
   });
 });

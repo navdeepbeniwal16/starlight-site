@@ -1,14 +1,22 @@
 import { Suspense } from "react";
+import { Beta } from "@/components/beta";
+import { Faq } from "@/components/faq";
 import { FeatureSection } from "@/components/feature-section";
+import { FinalCta } from "@/components/final-cta";
+import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { Logo } from "@/components/logo";
+import { Pricing } from "@/components/pricing";
 import { Projects } from "@/components/projects";
-import { getLandingPage } from "@/sanity/lib/fetch";
+import { getLandingPage, getSiteSettings } from "@/sanity/lib/fetch";
 import { SignupStatus } from "./signup-status";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const page = await getLandingPage();
+  const [page, settings] = await Promise.all([
+    getLandingPage(),
+    getSiteSettings(),
+  ]);
   const hero = page?.hero ?? null;
   const featureSections = page?.featureSections ?? [];
   const howItWorks = page?.howItWorks ?? null;
@@ -74,7 +82,24 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               );
           }
         })}
+
+        {/* Unlike the story sections above, the conversion run renders unconditionally,
+            falling back to static copy when the CMS is empty. */}
+        <Beta content={page?.beta ?? null} />
+        <Pricing content={page?.pricing ?? null} tone="paper" rule />
+        <Faq content={page?.faq ?? null} tone="beige" rule />
+        <FinalCta
+          content={page?.finalCta ?? null}
+          tone="paper"
+          rule
+          status={
+            <Suspense fallback={null}>
+              <SignupStatus searchParams={searchParams} />
+            </Suspense>
+          }
+        />
       </main>
+      <Footer content={page?.footer ?? null} supportEmail={settings?.supportEmail} />
     </>
   );
 }

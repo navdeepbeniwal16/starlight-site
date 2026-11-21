@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type Tone = "paper" | "beige";
+type Tone = "paper" | "beige" | "ink";
 
 export function Section({
   tone = "paper",
@@ -15,7 +15,8 @@ export function Section({
   className?: string;
   children: ReactNode;
 }) {
-  const band = tone === "beige" ? "bg-beige" : "bg-paper";
+  const band =
+    tone === "ink" ? "bg-ink" : tone === "beige" ? "bg-beige" : "bg-paper";
   const separator = rule ? "border-t border-hairline" : "";
   return (
     <section id={id} className={`${band} ${separator} px-6 py-20 sm:py-28`}>
