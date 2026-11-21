@@ -5,7 +5,7 @@ import { SignupForms } from "./signup-forms";
 
 // SignupToken is an async server component (connection()) and can't render in jsdom;
 // its signing is covered in abuse.test.ts.
-vi.mock("./signup-token", () => ({ SignupToken: () => null }));
+vi.mock("@/components/signup-token", () => ({ SignupToken: () => null }));
 
 describe("SignupForms", () => {
   it("exposes a form for each segment that posts to the signup handler", () => {

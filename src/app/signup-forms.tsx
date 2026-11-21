@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Segment } from "@/generated/prisma/enums";
 import { HONEYPOT_FIELD } from "@/lib/signup/abuse";
-import { SignupToken } from "./signup-token";
+import { SignupToken } from "@/components/signup-token";
 
 // Intentionally minimal and unstyled; the Warm Editorial UI lands in #2 / #10.
 export function SignupForms() {
