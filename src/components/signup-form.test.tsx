@@ -32,6 +32,19 @@ describe("SignupForm", () => {
     expect(waitlist).toHaveAttribute("value", "launch_waitlist");
   });
 
+  it("carries a source as a hidden field only when one is given", () => {
+    const { rerender } = render(<SignupForm id="hero" actions={DUAL} />);
+    let form = screen.getByRole("button", { name: /ios beta/i }).closest("form")!;
+    expect(form.querySelector('input[name="source"]')).toBeNull();
+
+    rerender(<SignupForm id="hero" actions={DUAL} source="beta" />);
+    form = screen.getByRole("button", { name: /ios beta/i }).closest("form")!;
+    expect(form.querySelector('input[name="source"]')).toHaveAttribute(
+      "value",
+      "beta",
+    );
+  });
+
   it("requires submit-time consent", () => {
     render(
       <SignupForm

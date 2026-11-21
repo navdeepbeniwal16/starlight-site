@@ -9,13 +9,20 @@ export type SignupAction = {
   variant?: "primary" | "secondary";
 };
 
-function buttonClass(variant: "primary" | "secondary"): string {
+function buttonClass(
+  variant: "primary" | "secondary",
+  onDark: boolean,
+): string {
   const base =
     "inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors sm:w-auto";
-  // Gold fills the primary button with ink text for AA contrast; it's never the text colour.
-  return variant === "secondary"
-    ? `${base} border border-ink/70 text-ink hover:bg-ink hover:text-paper`
-    : `${base} bg-gold text-ink hover:bg-gold-ink hover:text-paper`;
+  // Gold fills the primary button with ink text for AA contrast on either band; it's
+  // never the text colour. The outlined secondary flips to a light border on dark.
+  if (variant === "primary") {
+    return `${base} bg-gold text-ink hover:bg-gold-ink hover:text-paper`;
+  }
+  return onDark
+    ? `${base} border border-paper/50 text-paper hover:bg-paper hover:text-ink`
+    : `${base} border border-ink/70 text-ink hover:bg-ink hover:text-paper`;
 }
 
 // SignupForm gives each submit button its own segment name/value, so one form drives a
@@ -23,10 +30,17 @@ function buttonClass(variant: "primary" | "secondary"): string {
 export function SignupForm({
   id,
   actions,
+  source,
+  onDark = false,
   consentLabel = "I agree to be contacted about Starlight and accept the privacy note.",
 }: {
   id: string;
   actions: SignupAction[];
+  // Attribution for which form the signup came from (hero, beta, final CTA); the route
+  // stores it verbatim.
+  source?: string;
+  // Light text for the consent note and outlined button when the form sits on a dark band.
+  onDark?: boolean;
   consentLabel?: string;
 }) {
   const emailId = `${id}-email`;
@@ -34,6 +48,7 @@ export function SignupForm({
   const honeypotId = `${id}-${HONEYPOT_FIELD}`;
   return (
     <form method="post" action="/api/signup" className="flex w-full flex-col gap-3">
+      {source ? <input type="hidden" name="source" value={source} /> : null}
       {/* Honeypot: a decoy the markup hides from humans and assistive tech but a bot
           fills. Deliberately a real text input — type=hidden would tip off the bot. */}
       <div
@@ -70,7 +85,7 @@ export function SignupForm({
             type="submit"
             name="segment"
             value={action.segment}
-            className={buttonClass(action.variant ?? "primary")}
+            className={buttonClass(action.variant ?? "primary", onDark)}
           >
             {action.label}
           </button>
@@ -79,7 +94,7 @@ export function SignupForm({
 
       <label
         htmlFor={consentId}
-        className="flex items-start gap-2 text-sm text-muted"
+        className={`flex items-start gap-2 text-sm ${onDark ? "text-paper/70" : "text-muted"}`}
       >
         <input
           id={consentId}

@@ -63,7 +63,7 @@ export function Hero({
           <p className="text-lg leading-8 text-muted">{subheading}</p>
 
           <div className="flex w-full flex-col gap-3 pt-2">
-            <SignupForm id="hero" actions={actions} />
+            <SignupForm id="hero" actions={actions} source="hero" />
             {footnote ? <p className="text-sm text-muted">{footnote}</p> : null}
             {status}
           </div>
