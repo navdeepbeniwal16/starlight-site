@@ -23,20 +23,32 @@ const inter = Inter({
 export async function generateMetadata(): Promise<Metadata> {
   // Editable site-wide SEO from Sanity; falls back to static copy when unconfigured.
   const settings = await getSiteSettings();
+  const title = settings?.siteTitle ?? siteConfig.name;
+  const description = settings?.metaDescription ?? siteConfig.description;
   const ogImageUrl = settings?.ogImage
     ? urlForImage(settings.ogImage)?.width(1200).height(630).fit("crop").url()
     : null;
+  const images = ogImageUrl
+    ? [{ url: ogImageUrl, width: 1200, height: 630, alt: settings?.ogImage?.alt }]
+    : undefined;
 
   return {
-    title: settings?.siteTitle ?? siteConfig.name,
-    description: settings?.metaDescription ?? siteConfig.description,
-    openGraph: ogImageUrl
-      ? {
-          images: [
-            { url: ogImageUrl, width: 1200, height: 630, alt: settings?.ogImage?.alt },
-          ],
-        }
-      : undefined,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName: title,
+      type: "website",
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImageUrl ? [ogImageUrl] : undefined,
+      creator: settings?.socialHandle ?? undefined,
+    },
   };
 }
 
