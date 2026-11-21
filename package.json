@@ -15,12 +15,18 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@portabletext/react": "^8.0.1",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "@sanity/image-url": "^2.2.0",
+    "@sanity/vision": "^6.24.0",
     "@vercel/speed-insights": "^2.1.0",
     "next": "16.4.6",
+    "next-sanity": "^13.5.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "sanity": "^6.24.0",
+    "styled-components": "^6.6.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",

@@ -24,9 +24,13 @@ function redirect(location: string, base: string): Response {
 // The identical response a real signup and a tripped bot both get, so a bot can't tell
 // it was dropped. `created` only splits joined/already on the launch path; beta always
 // redirects to TestFlight.
-function signupSuccess(segment: Segment, created: boolean, base: string): Response {
+async function signupSuccess(
+  segment: Segment,
+  created: boolean,
+  base: string,
+): Promise<Response> {
   if (segment === Segment.beta_tester) {
-    return redirect(testFlightUrl(), base);
+    return redirect(await testFlightUrl(), base);
   }
   return redirect(
     `/?status=${created ? SIGNUP_STATUS.joined : SIGNUP_STATUS.already}`,
