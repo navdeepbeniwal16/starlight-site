@@ -16,6 +16,13 @@ export const siteConfig = {
     cta: "Get the iOS beta",
     footnote: "Beta testers keep six months free at launch — no credit card.",
   },
+  footer: {
+    tagline: "Turn an endless to-do list into a focused day.",
+    // Used when siteSettings has no supportEmail (local/CI, or before it's filled in).
+    supportEmail: "hello@starlight.app",
+    // "How this site was built" points at the public repo behind this very page.
+    builtUrl: "https://github.com/navdeepbeniwal16/starlight-site",
+  },
   finalCta: {
     heading: "Be first to know at launch",
     body: "Drop your email and we'll tell you the moment Starlight is ready for you.",
