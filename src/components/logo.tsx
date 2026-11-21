@@ -1,8 +1,6 @@
 import { siteConfig } from "@/lib/site";
 
-// The logo lockup: the gold four-point sparkle (the app's mark, mirrored from
-// public/Starlight.svg) beside the Fraunces wordmark. The sparkle is decorative; the
-// wordmark text carries the accessible name.
+// Logo's inline sparkle mirrors public/Starlight.svg; keep the two in sync.
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>

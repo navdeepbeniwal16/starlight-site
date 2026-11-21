@@ -24,7 +24,7 @@ describe("SignupForm", () => {
     expect(form).toHaveAttribute("action", "/api/signup");
     expect(form.querySelector('input[name="email"]')).toBeRequired();
 
-    // The segment rides on the clicked button, so a single form serves both CTAs.
+    // The segment rides on the clicked button, not a hidden field.
     const beta = screen.getByRole("button", { name: /ios beta/i });
     const waitlist = screen.getByRole("button", { name: /notify me at launch/i });
     expect(beta).toHaveAttribute("name", "segment");

@@ -1,5 +1,5 @@
-// Static fallbacks used wherever the CMS hasn't been filled in (local/CI, or before
-// an editor publishes). Sanity content overrides every one of these at runtime.
+// siteConfig holds the static fallbacks used until the CMS is filled in (local/CI, or
+// before an editor publishes); Sanity content overrides every field at runtime.
 export const siteConfig = {
   name: "Starlight",
   eyebrow: "Now in private beta",

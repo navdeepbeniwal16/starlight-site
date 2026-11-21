@@ -12,17 +12,14 @@ export type SignupAction = {
 function buttonClass(variant: "primary" | "secondary"): string {
   const base =
     "inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors sm:w-auto";
-  // Gold is a large-display accent, so it's the fill of the primary button with ink
-  // text (AA), never small body text. The secondary path stays an ink outline.
+  // Gold fills the primary button with ink text for AA contrast; it's never the text colour.
   return variant === "secondary"
     ? `${base} border border-ink/70 text-ink hover:bg-ink hover:text-paper`
     : `${base} bg-gold text-ink hover:bg-gold-ink hover:text-paper`;
 }
 
-// The Warm Editorial signup form: a pill email field, a required submit-time consent
-// box, and one submit button per action. Each button carries the segment as its own
-// name/value, so a single form drives either a single CTA or the hero's dual CTA —
-// the segment the server reads is whichever button the visitor pressed.
+// SignupForm gives each submit button its own segment name/value, so one form drives a
+// single CTA or the hero's dual CTA — the server reads whichever button was pressed.
 export function SignupForm({
   id,
   actions,
@@ -95,8 +92,6 @@ export function SignupForm({
         <span>{consentLabel}</span>
       </label>
 
-      {/* Signed render-time token for the time-trap; the Suspense boundary keeps it
-          out of the static shell (Cache Components), so it isn't stale on submit. */}
       <Suspense fallback={null}>
         <SignupToken />
       </Suspense>

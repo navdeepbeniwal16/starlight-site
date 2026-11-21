@@ -15,8 +15,7 @@ const KIND_TO_SEGMENT: Record<CtaKind, Segment> = {
   waitlist: Segment.launch_waitlist,
 };
 
-// Code-owned fallback so the hero renders a complete scene before an editor fills
-// Sanity (and in local/CI, where the CMS isn't configured).
+// Rendered when Sanity has no hero CTAs (local/CI, or before an editor publishes).
 const DEFAULT_ACTIONS: SignupAction[] = [
   { segment: Segment.beta_tester, label: siteConfig.betaCta, variant: "primary" },
   {
@@ -28,7 +27,6 @@ const DEFAULT_ACTIONS: SignupAction[] = [
 
 function toActions(cta: HeroContent["cta"]): SignupAction[] {
   if (!cta || cta.length === 0) return DEFAULT_ACTIONS;
-  // The first CTA leads in gold; the rest are ink outlines, so one path stays dominant.
   return cta.map((entry, index) => ({
     segment: KIND_TO_SEGMENT[entry.kind],
     label: entry.label,
@@ -36,9 +34,6 @@ function toActions(cta: HeroContent["cta"]): SignupAction[] {
   }));
 }
 
-// The first rendered section: eyebrow, display headline, lead subcopy, the dual CTA,
-// a reassurance footnote, and the device scene — all from Sanity, with static
-// fallbacks. `status` carries the post-submit banner the page reads from the URL.
 export function Hero({
   hero,
   status,
@@ -86,8 +81,6 @@ export function Hero({
                 priority
               />
             ) : (
-              // No poster yet: the frame still reserves the space, so a clip or
-              // screenshot drops in later without reflowing the hero.
               <div aria-hidden="true" className="h-full w-full bg-screen" />
             )}
           </DeviceFrame>

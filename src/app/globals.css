@@ -1,26 +1,23 @@
 @import "tailwindcss";
 
-/* Warm Editorial design tokens — the single source of truth for the launch site,
-   mirroring the app's own palette (apps/mobile/lib/theme.ts). Colours land here as
-   `--color-*` so Tailwind generates `bg-*`/`text-*`/`border-*` utilities and the raw
-   `var(--color-*)` stays available to hand-written CSS. */
+/* Warm Editorial palette, mirrored from the app's theme (apps/mobile/lib/theme.ts) —
+   update it there first. Gold is a decorative/large-display accent only; use gold-ink
+   (or ink) for text on light. */
 @theme {
-  --color-paper: #fdfcfa; /* page base */
-  --color-beige: #f3efe8; /* alternating section band */
-  --color-ink: #2a2621; /* body + headings on light */
-  --color-muted: #7a736a; /* secondary copy */
-  --color-gold: #d4a574; /* accent — decorative / large-display only */
-  --color-gold-ink: #b07841; /* legible gold for text on light (eyebrows) */
-  --color-frame: #efe9df; /* device frame */
-  --color-screen: #fffdf8; /* device screen */
-  --color-hairline: rgb(42 38 33 / 0.12); /* section separators + input borders */
+  --color-paper: #fdfcfa;
+  --color-beige: #f3efe8;
+  --color-ink: #2a2621;
+  --color-muted: #7a736a;
+  --color-gold: #d4a574;
+  --color-gold-ink: #b07841;
+  --color-frame: #efe9df;
+  --color-screen: #fffdf8;
+  --color-hairline: rgb(42 38 33 / 0.12);
 
-  /* Fraunces carries the display voice; Inter the body. next/font sets the
-     referenced variables on <html> in the root layout. */
+  /* --font-fraunces and --font-inter are set by next/font in the root layout. */
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-inter);
 
-  /* The device frame's soft long shadow, reused by every framed media block. */
   --shadow-device: 0 30px 60px -32px rgb(42 38 33 / 0.28);
 }
 

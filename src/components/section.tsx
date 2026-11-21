@@ -2,9 +2,6 @@ import type { ReactNode } from "react";
 
 type Tone = "paper" | "beige";
 
-// A full-width page section carrying the Warm Editorial rhythm: generous vertical
-// space, a centred content measure, and the paper↔beige alternation later section
-// tickets lean on. `rule` draws the hairline that separates adjacent bands.
 export function Section({
   tone = "paper",
   rule = false,

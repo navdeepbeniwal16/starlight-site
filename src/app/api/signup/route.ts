@@ -66,8 +66,8 @@ export async function POST(request: Request): Promise<Response> {
 
   const email = normalizeEmail(rawEmail);
   const source = form.get("source");
-  // Stamped when the submit-time consent box is ticked; it's the lawful basis a later
-  // ticket needs before identifying the person downstream.
+  // A ticked consent box is the lawful basis for identifying this person downstream;
+  // unticked still stores the signup, just without that basis.
   const consentAt = form.get("consent") === "true" ? new Date() : null;
   let created: boolean;
   try {

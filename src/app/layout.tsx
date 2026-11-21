@@ -6,8 +6,6 @@ import { getSiteSettings } from "@/sanity/lib/fetch";
 import { urlForImage } from "@/sanity/lib/image";
 import "./globals.css";
 
-// Warm Editorial typography: Fraunces for display, Inter for body. Both are
-// variable fonts, so no per-weight loading is needed.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],

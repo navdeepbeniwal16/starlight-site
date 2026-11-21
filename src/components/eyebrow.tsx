@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-// The Warm Editorial eyebrow: a small, wide-tracked label above a heading. Gold-ink
-// (not gold) so it stays legible as small text on light — see the palette a11y note.
+// Eyebrow uses gold-ink, not gold: gold fails AA as small text on light.
 export function Eyebrow({
   children,
   className = "",

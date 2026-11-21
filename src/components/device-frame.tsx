@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 
-// A warm phone frame shared by every framed media block. The screen is `relative`
-// with a phone aspect ratio so callers can drop in a `fill` image — or, later, a
-// looping clip — into the reserved space without touching the layout.
+// DeviceFrame keeps its screen `relative` with a fixed aspect ratio so a `fill` child
+// sits in reserved space that doesn't reflow when its contents change.
 export function DeviceFrame({
   children,
   className = "",
