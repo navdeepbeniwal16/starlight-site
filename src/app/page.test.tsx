@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import Home from "./page";
 import { siteConfig } from "@/lib/site";
@@ -12,25 +12,32 @@ async function renderHome() {
   );
 }
 
+// The hero is always the first <section>; the beta band and final CTA repeat its CTA
+// labels, so hero assertions scope here rather than querying the whole page.
+function hero(container: HTMLElement) {
+  return within(container.querySelector("section")!);
+}
+
 describe("Home page shell", () => {
   it("renders the fallback hero headline and the dual CTA", async () => {
-    await renderHome();
+    const { container } = await renderHome();
 
     expect(
-      screen.getByRole("heading", { level: 1, name: siteConfig.tagline }),
+      hero(container).getByRole("heading", { level: 1, name: siteConfig.tagline }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: siteConfig.betaCta }),
+      hero(container).getByRole("button", { name: siteConfig.betaCta }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: siteConfig.waitlistCta }),
+      hero(container).getByRole("button", { name: siteConfig.waitlistCta }),
     ).toBeInTheDocument();
   });
 
   it("surfaces the logo lockup and the fallback eyebrow", async () => {
-    await renderHome();
+    const { container } = await renderHome();
 
-    expect(screen.getByText(siteConfig.name)).toBeInTheDocument();
-    expect(screen.getByText(siteConfig.eyebrow)).toBeInTheDocument();
+    // The lockup sits in both the header and the footer.
+    expect(screen.getAllByText(siteConfig.name).length).toBeGreaterThan(0);
+    expect(hero(container).getByText(siteConfig.eyebrow)).toBeInTheDocument();
   });
 });

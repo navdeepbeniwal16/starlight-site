@@ -1,14 +1,23 @@
 import { Suspense } from "react";
+import { Beta } from "@/components/beta";
+import { Faq } from "@/components/faq";
 import { FeatureSection } from "@/components/feature-section";
+import { FinalCta } from "@/components/final-cta";
+import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { Logo } from "@/components/logo";
+import { Pricing } from "@/components/pricing";
 import { Projects } from "@/components/projects";
-import { getLandingPage } from "@/sanity/lib/fetch";
+import { getLandingPage, getSiteSettings } from "@/sanity/lib/fetch";
 import { SignupStatus } from "./signup-status";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const page = await getLandingPage();
+  // Both are cached singleton fetches, so resolve them together.
+  const [page, settings] = await Promise.all([
+    getLandingPage(),
+    getSiteSettings(),
+  ]);
   const hero = page?.hero ?? null;
   const featureSections = page?.featureSections ?? [];
   const howItWorks = page?.howItWorks ?? null;
@@ -74,7 +83,25 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               );
           }
         })}
+
+        {/* The conversion run always renders (it's the page's reason for existing), so
+            it falls back to static copy rather than disappearing when the CMS is empty.
+            The dark beta band resets the rhythm, so the rest restarts from paper. */}
+        <Beta content={page?.beta ?? null} />
+        <Pricing content={page?.pricing ?? null} tone="paper" rule />
+        <Faq content={page?.faq ?? null} tone="beige" rule />
+        <FinalCta
+          content={page?.finalCta ?? null}
+          tone="paper"
+          rule
+          status={
+            <Suspense fallback={null}>
+              <SignupStatus searchParams={searchParams} />
+            </Suspense>
+          }
+        />
       </main>
+      <Footer content={page?.footer ?? null} supportEmail={settings?.supportEmail} />
     </>
   );
 }
