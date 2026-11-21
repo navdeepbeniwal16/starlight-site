@@ -15,7 +15,12 @@ const hero = {
   eyebrow: "Private beta",
   heading: "Map the night sky from your pocket",
   subheading: "Starlight turns your phone into a telescope finder.",
-  cta: { label: "Join the beta", kind: "beta" as const },
+  devicePoster: null,
+  cta: [
+    { label: "Get the iOS beta", kind: "beta" as const },
+    { label: "Notify me at launch", kind: "waitlist" as const },
+  ],
+  ctaFootnote: "Free during the beta.",
 };
 
 const landingPage: LandingPage = {
@@ -40,16 +45,22 @@ async function renderHome() {
 describe("Home with CMS content", () => {
   beforeEach(() => getLandingPage.mockReset());
 
-  it("renders hero copy fetched through the typed layer", async () => {
+  it("renders hero copy and the dual CTA fetched through the typed layer", async () => {
     getLandingPage.mockResolvedValue(landingPage);
 
     await renderHome();
 
     expect(
-      screen.getByRole("heading", { name: hero.heading }),
+      screen.getByRole("heading", { level: 1, name: hero.heading }),
     ).toBeInTheDocument();
     expect(screen.getByText(hero.subheading)).toBeInTheDocument();
     expect(screen.getByText(hero.eyebrow)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: hero.cta[0].label }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: hero.cta[1].label }),
+    ).toBeInTheDocument();
   });
 
   it("falls back to static copy when the CMS returns nothing", async () => {

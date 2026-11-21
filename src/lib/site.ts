@@ -1,7 +1,12 @@
+// siteConfig holds the static fallbacks used until the CMS is filled in (local/CI, or
+// before an editor publishes); Sanity content overrides every field at runtime.
 export const siteConfig = {
   name: "Starlight",
-  tagline: "Something new is taking shape.",
+  eyebrow: "Now in private beta",
+  tagline: "Turn an endless to-do list into a focused day.",
   description:
-    "Starlight is launching soon. Join the beta waitlist to be first through the door.",
-  waitlistStatus: "Beta waitlist opening soon",
+    "Starlight turns the scramble of everything you have to do into one calm, focused plan for the day.",
+  betaCta: "Get the iOS beta",
+  waitlistCta: "Notify me at launch",
+  ctaFootnote: "Free during the beta — no credit card, unsubscribe anytime.",
 } as const;

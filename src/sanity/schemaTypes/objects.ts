@@ -145,7 +145,39 @@ export const hero = defineType({
       rows: 3,
       validation: (rule) => rule.max(200).warning("Keep the subheading tight."),
     }),
-    defineField({ name: "cta", type: "cta" }),
+    defineField({
+      name: "devicePoster",
+      title: "Device scene",
+      type: "image",
+      description:
+        "Phone screenshot shown in the hero's device frame. Doubles as the poster if a clip is added here later.",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alternative text",
+          type: "string",
+          validation: (rule) =>
+            rule.required().error("Alt text is required for accessibility."),
+        }),
+      ],
+    }),
+    defineField({
+      name: "cta",
+      title: "Call to action buttons",
+      description: "The dual CTA — one beta button and one waitlist button.",
+      type: "array",
+      of: [defineArrayMember({ type: "cta" })],
+      validation: (rule) =>
+        rule.max(2).warning("The hero shows two CTAs: one beta, one waitlist."),
+    }),
+    defineField({
+      name: "ctaFootnote",
+      title: "CTA footnote",
+      type: "string",
+      description: "Reassurance line under the buttons (e.g. free during beta).",
+      validation: (rule) => rule.max(120).warning("Keep the footnote short."),
+    }),
   ],
 });
 

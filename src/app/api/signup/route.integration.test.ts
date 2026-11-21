@@ -77,6 +77,20 @@ describe("POST /api/signup", () => {
     });
   });
 
+  it("stamps consent_at when the consent box is ticked, leaves it null otherwise", async () => {
+    await submit({ email: "consented@example.com", segment: "launch_waitlist", consent: "true" });
+    await submit({ email: "silent@example.com", segment: "launch_waitlist" });
+
+    const consented = await prisma.signup.findFirstOrThrow({
+      where: { email: "consented@example.com" },
+    });
+    const silent = await prisma.signup.findFirstOrThrow({
+      where: { email: "silent@example.com" },
+    });
+    expect(consented.consentAt).not.toBeNull();
+    expect(silent.consentAt).toBeNull();
+  });
+
   it("dedups the same (email, segment): one row, idempotent already-on-list", async () => {
     await submit({ email: "dup@example.com", segment: "launch_waitlist" });
     const res = await submit({

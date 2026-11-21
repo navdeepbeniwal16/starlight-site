@@ -66,6 +66,9 @@ export async function POST(request: Request): Promise<Response> {
 
   const email = normalizeEmail(rawEmail);
   const source = form.get("source");
+  // A ticked consent box is the lawful basis for identifying this person downstream;
+  // unticked still stores the signup, just without that basis.
+  const consentAt = form.get("consent") === "true" ? new Date() : null;
   let created: boolean;
   try {
     // skipDuplicates compiles to ON CONFLICT DO NOTHING; count is 0 when the
@@ -76,6 +79,7 @@ export async function POST(request: Request): Promise<Response> {
           email,
           segment,
           source: typeof source === "string" && source.length > 0 ? source : null,
+          consentAt,
         },
       ],
       skipDuplicates: true,
