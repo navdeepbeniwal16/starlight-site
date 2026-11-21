@@ -10,7 +10,7 @@ const FEATURE_SECTION = `{ eyebrow, heading, body, ${FEATURE_MEDIA} }`;
 // Singletons are fetched by type (there is only ever one of each). The `published`
 // perspective on the client keeps drafts out.
 export const landingPageQuery = defineQuery(`*[_type == "landingPage"][0]{
-  hero{ eyebrow, heading, subheading, ${CTA} },
+  hero{ eyebrow, heading, subheading, devicePoster, cta[]{ label, kind }, ctaFootnote },
   featureSections[]${FEATURE_SECTION},
   howItWorks{ heading, steps[]{ title, body } },
   projects{ heading, body, items[]${FEATURE_SECTION} },

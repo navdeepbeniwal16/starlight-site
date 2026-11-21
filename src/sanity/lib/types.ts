@@ -31,7 +31,9 @@ export interface Hero {
   eyebrow: string | null;
   heading: string;
   subheading: string | null;
-  cta: Cta | null;
+  devicePoster: ImageWithAlt | null;
+  cta: Cta[] | null;
+  ctaFootnote: string | null;
 }
 
 export interface Step {

@@ -15,7 +15,12 @@ const hero = {
   eyebrow: "Private beta",
   heading: "Map the night sky from your pocket",
   subheading: "Starlight turns your phone into a telescope finder.",
-  cta: { label: "Join the beta", kind: "beta" as const },
+  devicePoster: null,
+  cta: [
+    { label: "Get the iOS beta", kind: "beta" as const },
+    { label: "Notify me at launch", kind: "waitlist" as const },
+  ],
+  ctaFootnote: "Free during the beta.",
 };
 
 const landingPage: LandingPage = {
