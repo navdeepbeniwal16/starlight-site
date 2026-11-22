@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Caprasimo, Fraunces, Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteConfig } from "@/lib/site";
 import { getSiteSettings } from "@/sanity/lib/fetch";
@@ -14,6 +14,13 @@ const fraunces = Fraunces({
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const caprasimo = Caprasimo({
+  variable: "--font-caprasimo",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
@@ -54,7 +61,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${inter.variable} ${caprasimo.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

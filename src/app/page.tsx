@@ -7,7 +7,7 @@ import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { Logo } from "@/components/logo";
-import { Pricing } from "@/components/pricing";
+import { PlanPreview } from "@/components/plan-preview";
 import { Projects } from "@/components/projects";
 import { getLandingPage, getSiteSettings } from "@/sanity/lib/fetch";
 import { SignupStatus } from "./signup-status";
@@ -62,7 +62,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           // Hero is paper, so the bands below alternate starting from beige.
           const tone = index % 2 === 0 ? "beige" : "paper";
           switch (entry.kind) {
-            case "feature":
+            case "feature": {
+              // Keyed off the CMS eyebrow text: rename "The plan" there and the band
+              // falls back to its screenshot instead of the live animation.
+              const isPlan =
+                entry.section.eyebrow?.trim().toLowerCase() === "the plan";
               return (
                 <FeatureSection
                   key={entry.key}
@@ -70,8 +74,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   flip={entry.flip}
                   tone={tone}
                   rule
+                  media={isPlan ? <PlanPreview /> : undefined}
                 />
               );
+            }
             case "howItWorks":
               return (
                 <HowItWorks key={entry.key} content={entry.content} tone={tone} rule />
@@ -86,7 +92,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         {/* Unlike the story sections above, the conversion run renders unconditionally,
             falling back to static copy when the CMS is empty. */}
         <Beta content={page?.beta ?? null} />
-        <Pricing content={page?.pricing ?? null} tone="paper" rule />
         <Faq content={page?.faq ?? null} tone="beige" rule />
         <FinalCta
           content={page?.finalCta ?? null}

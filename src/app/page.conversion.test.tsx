@@ -24,17 +24,21 @@ describe("Home conversion run", () => {
     getSiteSettings.mockResolvedValue(null);
   });
 
-  it("always renders beta, pricing, FAQ and final CTA from fallbacks", async () => {
+  it("always renders beta, FAQ and final CTA from fallbacks", async () => {
     await renderHome();
 
     for (const name of [
       siteConfig.beta.heading,
-      siteConfig.pricing.heading,
       siteConfig.faq.heading,
       siteConfig.finalCta.heading,
     ]) {
       expect(screen.getByRole("heading", { level: 2, name })).toBeInTheDocument();
     }
+
+    // Pricing is deliberately not part of the conversion run.
+    expect(
+      screen.queryByRole("heading", { name: siteConfig.pricing.heading }),
+    ).toBeNull();
   });
 
   it("makes the beta band the single dark spotlight", async () => {

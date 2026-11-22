@@ -71,7 +71,7 @@ export function SignupForm({
         name="email"
         autoComplete="email"
         required
-        placeholder="you@example.com"
+        placeholder="jordan.rivera@gmail.com"
         className="w-full rounded-full border border-hairline bg-paper px-5 py-3 text-ink placeholder:text-muted focus:border-gold-ink focus:outline-none"
       />
 
