@@ -14,11 +14,19 @@
   --color-screen: #fffdf8;
   --color-hairline: rgb(42 38 33 / 0.12);
 
-  /* --font-fraunces and --font-inter are set by next/font in the root layout. */
+  /* Device-mockup hardware (web-only) — unlike the palette above, not mirrored from the app theme. */
+  --color-device-edge: #433b32;
+  --color-device: #2a241f;
+  --color-device-deep: #201b16;
+
+  /* The font vars are set by next/font in the root layout. */
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-inter);
+  --font-wordmark: var(--font-caprasimo);
 
-  --shadow-device: 0 30px 60px -32px rgb(42 38 33 / 0.28);
+  --shadow-device:
+    inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.25),
+    0 4px 10px rgb(42 38 33 / 0.16), 0 28px 54px -20px rgb(42 38 33 / 0.5);
 }
 
 body {
