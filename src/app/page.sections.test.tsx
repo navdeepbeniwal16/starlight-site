@@ -96,7 +96,7 @@ describe("Home story & feature sections", () => {
       .getAllByRole("heading", { level: 2 })
       .map((node) => node.textContent);
 
-    // The always-on conversion run (beta, pricing, FAQ, final CTA) trails these.
+    // The always-on conversion run (beta, FAQ, final CTA) trails these.
     expect(headings.slice(0, 6)).toEqual([
       "The plan",
       "Bring your backlog",

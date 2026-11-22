@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { FeatureSection as FeatureSectionContent } from "@/sanity/lib/types";
 import { Eyebrow } from "./eyebrow";
 import { MediaFrame } from "./media-frame";
@@ -8,11 +9,13 @@ export function FeatureSection({
   flip = false,
   tone = "paper",
   rule = false,
+  media,
 }: {
   section: FeatureSectionContent;
   flip?: boolean;
   tone?: "paper" | "beige";
   rule?: boolean;
+  media?: ReactNode;
 }) {
   return (
     <Section tone={tone} rule={rule}>
@@ -28,9 +31,9 @@ export function FeatureSection({
         </div>
 
         <div
-          className={`mx-auto w-full max-w-[18rem] md:max-w-[20rem] ${flip ? "md:order-1" : ""}`}
+          className={`mx-auto w-full ${media ? "max-w-[20rem] md:max-w-[22rem]" : "max-w-[18rem] md:max-w-[20rem]"} ${flip ? "md:order-1" : ""}`}
         >
-          <MediaFrame media={section.featureMedia} />
+          {media ?? <MediaFrame media={section.featureMedia} />}
         </div>
       </div>
     </Section>
