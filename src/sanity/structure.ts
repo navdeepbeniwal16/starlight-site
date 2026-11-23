@@ -5,6 +5,7 @@ import type { StructureResolver } from "sanity/structure";
 export const SINGLETONS = [
   { id: "siteSettings", title: "Site Settings", schemaType: "siteSettings" },
   { id: "landingPage", title: "Landing Page", schemaType: "landingPage" },
+  { id: "legal", title: "Legal", schemaType: "legal" },
 ] as const;
 
 export const singletonTypes = new Set<string>(SINGLETONS.map((s) => s.schemaType));

@@ -1,5 +1,5 @@
 import type { SchemaTypeDefinition } from "sanity";
-import { landingPage, siteSettings } from "./documents";
+import { landingPage, legal, siteSettings } from "./documents";
 import {
   beta,
   cta,
@@ -11,6 +11,7 @@ import {
   footer,
   hero,
   howItWorks,
+  legalDocument,
   pricing,
   projects,
   step,
@@ -20,6 +21,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   // Singleton documents
   landingPage,
   siteSettings,
+  legal,
   // Sections
   hero,
   howItWorks,
@@ -35,4 +37,5 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   step,
   faqItem,
   cta,
+  legalDocument,
 ];
