@@ -7,9 +7,8 @@ import { readUtm, type Utm } from "./utm";
 
 const UTM_STORAGE_KEY = "starlight.utm";
 
-// First-touch UTM, stashed in sessionStorage (not a cookie, so still cookieless and
-// session-scoped) the first time it's seen. A mid-funnel redirect that strips the query
-// string — e.g. ?status=invalid after a bad email — then can't lose the original campaign.
+// First touch only: stashed in sessionStorage (not a cookie — stays cookieless) so a
+// mid-funnel redirect that strips the query string (e.g. ?status=invalid) can't lose it.
 export function captureFirstTouchUtm(): Utm {
   if (typeof window === "undefined") return {};
   const fromUrl = () => readUtm(new URLSearchParams(window.location.search));
@@ -37,10 +36,9 @@ export function captureSignupSubmitted(segment: Segment): void {
   posthog.capture(ANALYTICS_EVENTS.signupSubmitted, { segment });
 }
 
-// Consent is the lawful basis for a person profile, so this runs only on a consented submit.
-// The distinct_id is the email, normalized exactly as the route normalizes it, so the client
-// identify and the server events land on one person; anonymous pre-submit events merge into
-// it. First-touch UTM is set-once so a later submit can't overwrite the original campaign.
+// distinct_id is the email normalized exactly as the route normalizes it, so this identify and
+// the server events resolve to one person; anonymous pre-submit events merge in. UTM is passed
+// set-once so a later submit can't overwrite the first touch.
 export function identifySignup(email: string, segment: Segment, utm: Utm): void {
   if (!isAnalyticsConfigured) return;
   posthog.identify(

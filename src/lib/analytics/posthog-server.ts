@@ -6,17 +6,13 @@ type CaptureExceptionOptions = NonNullable<
   Parameters<PostHog["captureException"]>[1]
 >;
 
-// The server-side slice of analytics: the two server events and runtime-error reporting.
-// Narrowed to what the route and instrumentation actually call, so the no-op fake below
-// stays trivial.
+// A narrow seam over PostHog so the unconfigured path can swap in the no-op fake below.
 export interface ServerAnalytics {
   capture(message: CaptureMessage): void;
   captureException(error: unknown, options?: CaptureExceptionOptions): void;
   flush(): Promise<void>;
 }
 
-// Unconfigured (local, CI, tests): drop everything, so nothing reaches PostHog and no
-// network call is made — the same stance as the no-op HubSpot client.
 const noopAnalytics: ServerAnalytics = {
   capture() {},
   captureException() {},
@@ -30,12 +26,11 @@ const globalForAnalytics = globalThis as unknown as { posthog?: PostHog };
 function createClient(): PostHog {
   return new PostHog(POSTHOG_KEY, {
     host: POSTHOG_HOST,
-    // Serverless has no long-lived process to drain a timer-based queue, so disable the
-    // background flush and drain explicitly (in after()) once events are queued.
+    // Serverless has no long-lived process to drain a timer-based queue, so flush is disabled
+    // here and driven explicitly from after() once events are queued.
     flushAt: 1,
     flushInterval: 0,
-    // We attach country ourselves from the edge geo header and never forward the raw IP,
-    // so PostHog's own IP-based GeoIP enrichment stays off.
+    // Country is attached from the edge geo header instead, so the raw IP never reaches PostHog.
     disableGeoip: true,
   });
 }

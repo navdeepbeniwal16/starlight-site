@@ -43,10 +43,9 @@ function buttonClass(
     : `${base} border border-ink/70 text-ink hover:bg-ink hover:text-paper`;
 }
 
-// The interactive half of the signup form: it keeps the native POST (so a no-JS visitor can
-// still sign up) and layers the client analytics on top — cta_click per button, then
-// signup_submitted + a consented identify once the browser's own validation passes. The
-// per-request bot-trap token renders on the server and arrives as `children`.
+// The interactive half of the form. Keeps the native POST so signup still works without JS,
+// and layers the analytics handlers on top. The bot-trap token renders on the server and
+// arrives as children.
 export function SignupFormClient({
   id,
   actions,
@@ -61,9 +60,9 @@ export function SignupFormClient({
   const honeypotId = `${id}-${HONEYPOT_FIELD}`;
   const location = source ?? id;
 
-  // First-touch UTM lives in refs, not state: resolved once on mount and written straight
-  // into the hidden fields and the identify call. No re-render, and the server-rendered empty
-  // fields never mismatch on hydration.
+  // UTM lives in refs, not state: resolved once on mount and written straight to the hidden
+  // fields and the identify call. Server-rendered empty, so no re-render and no hydration
+  // mismatch.
   const formRef = useRef<HTMLFormElement>(null);
   const utmRef = useRef<Utm>({});
   useEffect(() => {
@@ -104,8 +103,8 @@ export function SignupFormClient({
       className="flex w-full flex-col gap-3"
     >
       {source ? <input type="hidden" name="source" value={source} /> : null}
-      {/* Empty on the server and first render; the mount effect fills them from first-touch
-          UTM. The route ignores blank values, so direct traffic posts no UTM. */}
+      {/* Filled by the mount effect from first-touch UTM; the route ignores blanks, so direct
+          traffic posts none. */}
       {UTM_KEYS.map((key) => (
         <input key={key} type="hidden" name={key} defaultValue="" />
       ))}

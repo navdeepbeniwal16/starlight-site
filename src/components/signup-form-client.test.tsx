@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Segment } from "@/generated/prisma/enums";
 
-// Stand in for the real posthog-client helpers so the test asserts what the form fires,
-// not what PostHog does with it. captureFirstTouchUtm feeds the identify UTM arg.
+// Stub the posthog-client helpers so the test asserts what the form fires. captureFirstTouchUtm
+// feeds the identify UTM arg.
 const { helpers } = vi.hoisted(() => ({
   helpers: {
     captureCtaClick: vi.fn(),

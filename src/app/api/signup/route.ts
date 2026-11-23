@@ -54,8 +54,8 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   // Guard before email validation: a tripped bot gets the silent fake-success, never
-  // the inline "invalid email" response that would reveal the trap. It deliberately fires
-  // no analytics, so bots never enter the funnel or inflate the signup_committed count.
+  // the inline "invalid email" response that would reveal the trap. Fires no analytics, so
+  // bots stay out of the funnel and the signup_committed count.
   if (
     isBotSubmission({
       honeypot: String(form.get(HONEYPOT_FIELD) ?? ""),
@@ -78,8 +78,8 @@ export async function POST(request: Request): Promise<Response> {
   // unticked still stores the signup, just without that basis.
   const consentAt = form.get("consent") === "true" ? new Date() : null;
   const utm = readUtmFromForm(form);
-  // Country-level geo only: Vercel resolves the edge IP to an ISO code upstream, so we read
-  // just the country and never touch — or store — the raw IP.
+  // Country-level geo only: Vercel resolves the edge IP upstream; we read just the ISO code and
+  // never the raw IP.
   const country = request.headers.get("x-vercel-ip-country") ?? undefined;
   let created: boolean;
   try {
@@ -110,13 +110,12 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const consented = consentAt !== null;
-  // Only a newly-created row fires signup_committed, so its per-segment count tracks the
-  // table exactly; a repeat submit (already on the list) doesn't double-count.
+  // Only a newly-created row fires signup_committed, so its per-segment count equals the table.
   if (created) {
     trackSignupCommitted({ email, segment, consented, country });
   }
-  // The beta path always 303s to TestFlight, so mark that funnel step for every real beta
-  // submit — first-time or repeat.
+  // The beta path always 303s to TestFlight, so every real beta submit marks this step, repeat
+  // or not.
   if (segment === Segment.beta_tester) {
     trackTestflightRedirect({ email, segment, consented, country });
   }

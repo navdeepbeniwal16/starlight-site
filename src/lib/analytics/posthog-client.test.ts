@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Segment } from "@/generated/prisma/enums";
 
-// posthog-js is a browser singleton; stub it so we can assert nothing is sent when the
-// project key is unset (the no-op posture every unconfigured environment runs in).
+// Stub posthog-js so we can assert nothing is sent when the key is unset.
 const { posthogMock } = vi.hoisted(() => ({
   posthogMock: { capture: vi.fn(), identify: vi.fn() },
 }));
