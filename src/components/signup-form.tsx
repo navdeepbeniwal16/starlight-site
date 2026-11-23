@@ -1,116 +1,22 @@
 import { Suspense } from "react";
-import type { Segment } from "@/generated/prisma/enums";
-import { HONEYPOT_FIELD } from "@/lib/signup/abuse";
+import {
+  SignupFormClient,
+  type SignupAction,
+  type SignupFormProps,
+} from "./signup-form-client";
 import { SignupToken } from "./signup-token";
 
-export type SignupAction = {
-  segment: Segment;
-  label: string;
-  variant?: "primary" | "secondary";
-};
+export type { SignupAction };
 
-function buttonClass(
-  variant: "primary" | "secondary",
-  onDark: boolean,
-): string {
-  const base =
-    "inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-[color,background-color,scale] active:scale-[0.96] sm:w-auto";
-  // Gold fills the primary button with ink text for AA contrast; it's never the text colour.
-  if (variant === "primary") {
-    return `${base} bg-gold text-ink hover:bg-gold-ink hover:text-paper`;
-  }
-  return onDark
-    ? `${base} border border-paper/50 text-paper hover:bg-paper hover:text-ink`
-    : `${base} border border-ink/70 text-ink hover:bg-ink hover:text-paper`;
-}
-
-// SignupForm gives each submit button its own segment name/value, so one form drives a
-// single CTA or the hero's dual CTA — the server reads whichever button was pressed.
-export function SignupForm({
-  id,
-  actions,
-  source,
-  onDark = false,
-  centerActions = false,
-  consentLabel = "I agree to be contacted about Starlight and accept the privacy note.",
-}: {
-  id: string;
-  actions: SignupAction[];
-  // Stored verbatim by the signup route as the signup's source column.
-  source?: string;
-  onDark?: boolean;
-  centerActions?: boolean;
-  consentLabel?: string;
-}) {
-  const emailId = `${id}-email`;
-  const consentId = `${id}-consent`;
-  const honeypotId = `${id}-${HONEYPOT_FIELD}`;
+// Server entry for the signup form: it owns the per-request bot-trap token (an async server
+// component that can't live inside the client half) and hands it to SignupFormClient as
+// children, which renders the actual <form> and the analytics handlers.
+export function SignupForm(props: SignupFormProps) {
   return (
-    <form method="post" action="/api/signup" className="flex w-full flex-col gap-3">
-      {source ? <input type="hidden" name="source" value={source} /> : null}
-      {/* Honeypot: a decoy the markup hides from humans and assistive tech but a bot
-          fills. Deliberately a real text input — type=hidden would tip off the bot. */}
-      <div
-        aria-hidden="true"
-        className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
-      >
-        <label htmlFor={honeypotId}>Leave this field empty</label>
-        <input
-          id={honeypotId}
-          type="text"
-          name={HONEYPOT_FIELD}
-          tabIndex={-1}
-          autoComplete="off"
-        />
-      </div>
-
-      <label htmlFor={emailId} className="sr-only">
-        Email address
-      </label>
-      <input
-        id={emailId}
-        type="email"
-        name="email"
-        autoComplete="email"
-        required
-        placeholder="jordan.rivera@gmail.com"
-        className="w-full rounded-full border border-hairline bg-paper px-5 py-3 text-ink placeholder:text-muted focus:border-gold-ink focus:outline-none"
-      />
-
-      <label
-        htmlFor={consentId}
-        className={`flex items-start gap-1.5 text-sm ${onDark ? "text-paper/70" : "text-muted"}`}
-      >
-        <input
-          id={consentId}
-          type="checkbox"
-          name="consent"
-          value="true"
-          required
-          className="mt-1 shrink-0 accent-gold-ink"
-        />
-        <span>{consentLabel}</span>
-      </label>
-
-      <div
-        className={`flex flex-col gap-2 sm:flex-row ${centerActions ? "sm:justify-center" : ""}`}
-      >
-        {actions.map((action) => (
-          <button
-            key={action.segment}
-            type="submit"
-            name="segment"
-            value={action.segment}
-            className={buttonClass(action.variant ?? "primary", onDark)}
-          >
-            {action.label}
-          </button>
-        ))}
-      </div>
-
+    <SignupFormClient {...props}>
       <Suspense fallback={null}>
         <SignupToken />
       </Suspense>
-    </form>
+    </SignupFormClient>
   );
 }
