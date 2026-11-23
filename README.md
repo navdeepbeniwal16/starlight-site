@@ -12,6 +12,7 @@ merge-gating CI pipeline and deploy-on-green via Vercel.
 - **Sanity** — structured-singleton CMS for the landing page, with Studio at `/studio`
 - **Vitest** + Testing Library (unit) and **Playwright** (E2E)
 - **Vercel** hosting + Speed Insights + Cron
+- **PostHog** (EU cloud) — cookieless analytics, conversion funnels, runtime error tracking
 
 ## Getting started
 
@@ -92,6 +93,69 @@ gets — and writes no row, so a bot can't tell it was dropped. An email-syntax 
 still surfaces inline. Set `SIGNUP_FORM_SECRET` (any high-entropy string, stable across
 instances) in the Vercel project env vars.
 
+## Analytics & conversion funnels (PostHog)
+
+Instrumentation runs on **PostHog EU cloud**, cookieless by default. The browser SDK uses
+in-memory persistence — no cookies, no local/session storage for identity — so an anonymous
+visitor's `distinct_id` lives only for the current page load and never persists across
+sessions, which is why the site needs **no consent banner**. Autocapture, session replay, and
+surveys are all off; the five manual events below are the entire surface. Everything stands
+down when `NEXT_PUBLIC_POSTHOG_KEY` is unset (local, CI, unconfigured deploys): the client SDK
+never initializes and the server client is a no-op fake — the same posture as the HubSpot
+client — so nothing reaches PostHog unless it's deliberately configured.
+
+### Events
+
+| Event                 | Side   | Fires when                                        | Props                   |
+| --------------------- | ------ | ------------------------------------------------- | ----------------------- |
+| `$pageview`           | client | each page load / client-side route change         | —                       |
+| `cta_click`           | client | a signup CTA button is clicked                     | `cta` (segment), `location` |
+| `signup_submitted`    | client | a form passes browser validation and submits       | `segment`               |
+| `signup_committed`    | server | a **new** signup row commits to Postgres           | `segment`, `country?`   |
+| `testflight_redirect` | server | a beta signup is 303'd to TestFlight               | `segment`, `country?`   |
+
+`signup_committed` fires once per newly-created row (never on a duplicate submit, never for a
+tripped bot), so its per-segment count equals the `signup` table. Both server events are keyed
+by the normalized email as `distinct_id` — the same key the client identify uses — so they land
+on one person.
+
+### Identity, consent, and merging
+
+A visitor stays anonymous until a **consented** submit calls `identify()` with the raw
+(normalized) email as `distinct_id` and person properties: the segment flag
+(`launch_waitlist` / `beta_tester`), first-touch UTM (set-once), and `consent_at`. PostHog
+merges the anonymous pre-submit events into that person on identify. An **unticked** consent
+box still stores the signup and still fires `signup_committed`, but with person processing off
+(`$process_person_profile: false`) — no profile is created and no email is attached to a person.
+
+### What's captured, and what isn't
+
+- **UTM** — first-touch UTM is read client-side (kept in `sessionStorage`, not a cookie, so a
+  mid-funnel redirect that strips the query string — e.g. `?status=invalid` — doesn't lose it),
+  posted on the form, and **persisted to the signup row** (`utm_*` columns). It also rides on
+  the consented identify as set-once person props.
+- **Geo** — country only. Vercel resolves the edge IP to an ISO code (`x-vercel-ip-country`)
+  that rides on the server events as `country`; the raw IP is never read or stored, and
+  PostHog's own GeoIP enrichment is disabled server-side.
+- **No referrer, no fingerprint, no cookies** — referrer properties sit in the SDK denylist,
+  and ad-id URL params (gclid, fbclid, …) are masked out before anything leaves the browser.
+
+### Error tracking
+
+Runtime errors feed PostHog error tracking (this satisfies the Ops runtime-error monitoring
+requirement): the client SDK autocaptures unhandled exceptions (`capture_exceptions`), and
+`src/instrumentation.ts`'s `onRequestError` forwards every server error — the signup API
+included, which also reports its write failures explicitly from the route's catch.
+
+### Funnels (defined in the PostHog UI)
+
+Two funnels, both built from the events above:
+
+1. **Launch waitlist** — `$pageview` → `cta_click` → `signup_submitted` → `signup_committed`,
+   with the two signup steps filtered to `segment = launch_waitlist`.
+2. **Beta** — the same four steps filtered to `segment = beta_tester`, then a final
+   `testflight_redirect`.
+
 ## Content (Sanity CMS)
 
 The landing page is a **structured singleton**, not a page builder: code owns which
@@ -141,8 +205,9 @@ These steps need Vercel/GitHub account access and are not scripted here:
 2. **Set `DATABASE_URL`** (pooled), **`DIRECT_URL`** (direct/unpooled — see
    [Database connections](#database-connections)), `TESTFLIGHT_URL`, `SIGNUP_FORM_SECRET`
    (see [Signup abuse protection](#signup-abuse-protection)), the `HUBSPOT_*` vars,
-   `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)), and the
-   `NEXT_PUBLIC_SANITY_*` + `SANITY_REVALIDATE_SECRET` vars (see [Content](#content-sanity-cms))
+   `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)), the
+   `NEXT_PUBLIC_SANITY_*` + `SANITY_REVALIDATE_SECRET` vars (see [Content](#content-sanity-cms)),
+   and the `NEXT_PUBLIC_POSTHOG_*` vars (see [Analytics](#analytics--conversion-funnels-posthog))
    in the Vercel project env vars.
 3. **Create the Sanity project & publish webhook** — create a project with a
    `production` dataset, set its id as `NEXT_PUBLIC_SANITY_PROJECT_ID`, and add a Sanity
@@ -150,3 +215,7 @@ These steps need Vercel/GitHub account access and are not scripted here:
    `SANITY_REVALIDATE_SECRET`. See [Content](#content-sanity-cms).
 4. **Branch protection** — require the `lint`, `typecheck`, `unit`,
    `integration`, and `e2e` checks on `main` (also configurable via `gh api`).
+5. **Create the PostHog project & funnels** — create an EU-cloud project, set its API key as
+   `NEXT_PUBLIC_POSTHOG_KEY`, and build the two conversion funnels in the UI (see
+   [Analytics](#analytics--conversion-funnels-posthog)). Error tracking and the events need no
+   dashboard setup beyond the key.
