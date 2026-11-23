@@ -9,19 +9,17 @@ type Answer = FaqContent["items"][number]["answer"] | string;
 export function Faq({
   content,
   tone = "paper",
-  rule = false,
 }: {
   content: FaqContent | null;
   tone?: "paper" | "beige";
-  rule?: boolean;
 }) {
   const heading = content?.heading ?? siteConfig.faq.heading;
   const items: readonly { question: string; answer: Answer }[] =
     content?.items ?? siteConfig.faq.items;
 
   return (
-    <Section tone={tone} rule={rule}>
-      <h2 className="font-display text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
+    <Section tone={tone}>
+      <h2 className="font-display text-balance text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
         {heading}
       </h2>
       <div className="mt-10 divide-y divide-hairline border-t border-hairline">

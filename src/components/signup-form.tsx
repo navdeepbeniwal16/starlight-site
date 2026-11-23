@@ -14,7 +14,7 @@ function buttonClass(
   onDark: boolean,
 ): string {
   const base =
-    "inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-colors sm:w-auto";
+    "inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-[color,background-color,scale] active:scale-[0.96] sm:w-auto";
   // Gold fills the primary button with ink text for AA contrast; it's never the text colour.
   if (variant === "primary") {
     return `${base} bg-gold text-ink hover:bg-gold-ink hover:text-paper`;
@@ -31,6 +31,7 @@ export function SignupForm({
   actions,
   source,
   onDark = false,
+  centerActions = false,
   consentLabel = "I agree to be contacted about Starlight and accept the privacy note.",
 }: {
   id: string;
@@ -38,6 +39,7 @@ export function SignupForm({
   // Stored verbatim by the signup route as the signup's source column.
   source?: string;
   onDark?: boolean;
+  centerActions?: boolean;
   consentLabel?: string;
 }) {
   const emailId = `${id}-email`;
@@ -75,7 +77,24 @@ export function SignupForm({
         className="w-full rounded-full border border-hairline bg-paper px-5 py-3 text-ink placeholder:text-muted focus:border-gold-ink focus:outline-none"
       />
 
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <label
+        htmlFor={consentId}
+        className={`flex items-start gap-1.5 text-sm ${onDark ? "text-paper/70" : "text-muted"}`}
+      >
+        <input
+          id={consentId}
+          type="checkbox"
+          name="consent"
+          value="true"
+          required
+          className="mt-1 shrink-0 accent-gold-ink"
+        />
+        <span>{consentLabel}</span>
+      </label>
+
+      <div
+        className={`flex flex-col gap-2 sm:flex-row ${centerActions ? "sm:justify-center" : ""}`}
+      >
         {actions.map((action) => (
           <button
             key={action.segment}
@@ -88,21 +107,6 @@ export function SignupForm({
           </button>
         ))}
       </div>
-
-      <label
-        htmlFor={consentId}
-        className={`flex items-start gap-2 text-sm ${onDark ? "text-paper/70" : "text-muted"}`}
-      >
-        <input
-          id={consentId}
-          type="checkbox"
-          name="consent"
-          value="true"
-          required
-          className="mt-1 accent-gold-ink"
-        />
-        <span>{consentLabel}</span>
-      </label>
 
       <Suspense fallback={null}>
         <SignupToken />

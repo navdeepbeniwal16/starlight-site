@@ -6,22 +6,20 @@ import { Section } from "./section";
 export function Projects({
   content,
   tone = "paper",
-  rule = false,
 }: {
   content: ProjectsContent;
   tone?: "paper" | "beige";
-  rule?: boolean;
 }) {
   const items = content.items ?? [];
 
   return (
-    <Section tone={tone} rule={rule}>
+    <Section tone={tone}>
       <div className="flex max-w-2xl flex-col gap-5">
-        <h2 className="font-display text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
+        <h2 className="font-display text-balance text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
           {content.heading}
         </h2>
         {content.body ? (
-          <p className="text-lg leading-8 text-muted">{content.body}</p>
+          <p className="text-lg leading-8 text-pretty text-muted">{content.body}</p>
         ) : null}
       </div>
 

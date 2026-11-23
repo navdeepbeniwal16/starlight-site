@@ -13,6 +13,8 @@
   --color-frame: #efe9df;
   --color-screen: #fffdf8;
   --color-hairline: rgb(42 38 33 / 0.12);
+  /* The palette's one non-warm token, for error states. */
+  --color-danger: #b4443a;
 
   /* Device-mockup hardware (web-only) — unlike the palette above, not mirrored from the app theme. */
   --color-device-edge: #433b32;

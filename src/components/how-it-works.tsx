@@ -4,15 +4,13 @@ import { Section } from "./section";
 export function HowItWorks({
   content,
   tone = "beige",
-  rule = false,
 }: {
   content: HowItWorksContent;
   tone?: "paper" | "beige";
-  rule?: boolean;
 }) {
   return (
-    <Section tone={tone} rule={rule}>
-      <h2 className="font-display text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
+    <Section tone={tone}>
+      <h2 className="font-display text-balance text-3xl leading-tight tracking-[-0.01em] text-ink sm:text-4xl">
         {content.heading}
       </h2>
       <ol className="mt-12 grid gap-10 sm:grid-cols-3 sm:gap-8">
