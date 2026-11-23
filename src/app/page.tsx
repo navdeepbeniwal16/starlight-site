@@ -8,7 +8,9 @@ import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { Logo } from "@/components/logo";
 import { PlanPreview } from "@/components/plan-preview";
+import { PlatformBanner } from "@/components/platform-banner";
 import { Projects } from "@/components/projects";
+import { siteConfig } from "@/lib/site";
 import { getLandingPage, getSiteSettings } from "@/sanity/lib/fetch";
 import { SignupStatus } from "./signup-status";
 
@@ -18,6 +20,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     getSiteSettings(),
   ]);
   const hero = page?.hero ?? null;
+  const ctaFootnote = hero?.ctaFootnote ?? siteConfig.ctaFootnote;
   const featureSections = page?.featureSections ?? [];
   const howItWorks = page?.howItWorks ?? null;
   const projects = page?.projects ?? null;
@@ -42,7 +45,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <>
-      <header className="px-6 py-6">
+      <header className="px-8 py-6">
         <div className="mx-auto max-w-5xl">
           <Logo />
         </div>
@@ -58,6 +61,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             </Suspense>
           }
         />
+        {ctaFootnote ? <PlatformBanner text={ctaFootnote} /> : null}
         {sections.map((entry, index) => {
           // Hero is paper, so the bands below alternate starting from beige.
           const tone = index % 2 === 0 ? "beige" : "paper";
@@ -73,18 +77,17 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   section={entry.section}
                   flip={entry.flip}
                   tone={tone}
-                  rule
                   media={isPlan ? <PlanPreview /> : undefined}
                 />
               );
             }
             case "howItWorks":
               return (
-                <HowItWorks key={entry.key} content={entry.content} tone={tone} rule />
+                <HowItWorks key={entry.key} content={entry.content} tone={tone} />
               );
             case "projects":
               return (
-                <Projects key={entry.key} content={entry.content} tone={tone} rule />
+                <Projects key={entry.key} content={entry.content} tone={tone} />
               );
           }
         })}
@@ -92,11 +95,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         {/* Unlike the story sections above, the conversion run renders unconditionally,
             falling back to static copy when the CMS is empty. */}
         <Beta content={page?.beta ?? null} />
-        <Faq content={page?.faq ?? null} tone="beige" rule />
+        <Faq content={page?.faq ?? null} tone="beige" />
         <FinalCta
           content={page?.finalCta ?? null}
           tone="paper"
-          rule
           status={
             <Suspense fallback={null}>
               <SignupStatus searchParams={searchParams} />

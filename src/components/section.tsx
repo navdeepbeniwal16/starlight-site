@@ -4,22 +4,19 @@ type Tone = "paper" | "beige" | "ink";
 
 export function Section({
   tone = "paper",
-  rule = false,
   id,
   className = "",
   children,
 }: {
   tone?: Tone;
-  rule?: boolean;
   id?: string;
   className?: string;
   children: ReactNode;
 }) {
   const band =
     tone === "ink" ? "bg-ink" : tone === "beige" ? "bg-beige" : "bg-paper";
-  const separator = rule ? "border-t border-hairline" : "";
   return (
-    <section id={id} className={`${band} ${separator} px-6 py-20 sm:py-28`}>
+    <section id={id} className={`${band} px-8 py-20 sm:py-28`}>
       <div className={`mx-auto w-full max-w-5xl ${className}`}>{children}</div>
     </section>
   );

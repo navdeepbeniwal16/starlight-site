@@ -44,7 +44,6 @@ export function Hero({
   const eyebrow = hero?.eyebrow ?? siteConfig.eyebrow;
   const heading = hero?.heading ?? siteConfig.tagline;
   const subheading = hero?.subheading ?? siteConfig.description;
-  const footnote = hero?.ctaFootnote ?? siteConfig.ctaFootnote;
   const actions = toActions(hero?.cta ?? null);
 
   const poster = hero?.devicePoster ?? null;
@@ -57,14 +56,13 @@ export function Hero({
       <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
         <div className="flex flex-col items-start gap-6">
           <Eyebrow>{eyebrow}</Eyebrow>
-          <h1 className="font-display text-5xl leading-[1.05] tracking-[-0.01em] text-ink sm:text-6xl">
+          <h1 className="font-display text-balance text-5xl leading-[1.05] tracking-[-0.01em] text-ink sm:text-6xl">
             {heading}
           </h1>
-          <p className="text-lg leading-8 text-muted">{subheading}</p>
+          <p className="text-lg leading-8 text-pretty text-muted">{subheading}</p>
 
           <div className="flex w-full flex-col gap-3 pt-2">
             <SignupForm id="hero" actions={actions} source="hero" />
-            {footnote ? <p className="text-sm text-muted">{footnote}</p> : null}
             {status}
           </div>
         </div>
