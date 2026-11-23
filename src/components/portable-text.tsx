@@ -4,10 +4,8 @@ import {
 } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/react";
 
-// Renders both Portable Text variants in the content model: the minimal one (FAQ
-// answers — normal blocks, bold/italic, links) and the legal one (/privacy, /terms —
-// adds section headings and lists). Paragraph spacing keys off `:not(:first-child)` so
-// a single-paragraph FAQ answer stays flush while stacked legal copy gets its gaps.
+// Paragraph spacing keys off `:not(:first-child)` so a single-paragraph FAQ answer stays
+// flush while the stacked /privacy and /terms copy still gets its gaps between blocks.
 const components: PortableTextComponents = {
   block: {
     normal: ({ children }) => (

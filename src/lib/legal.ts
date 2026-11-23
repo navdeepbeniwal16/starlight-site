@@ -3,15 +3,9 @@ import type { LegalDocument } from "@/sanity/lib/types";
 
 // Static privacy/terms copy, the counterpart to siteConfig: the /privacy and /terms
 // routes render this whenever Sanity is unconfigured (local, CI, pre-publish), so the
-// legal pages are never blank. Authoring it as Portable Text keeps one render path
-// whether the words come from here or the CMS.
-//
-// The copy is written to match what the signup pipeline actually does — email only (no
-// name), the four processors, cookieless analytics — so it stays accurate if it ever
-// ships as the live text.
+// pages are never blank. Authoring it as Portable Text keeps one render path whether the
+// words come from here or the CMS.
 
-// Global so keys are unique across both documents; Portable Text only requires
-// uniqueness within an array, which this satisfies trivially.
 let keySeq = 0;
 const nextKey = () => `k${(keySeq++).toString(36)}`;
 

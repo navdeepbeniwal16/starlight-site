@@ -15,9 +15,6 @@ function formatUpdated(iso: string): string {
   });
 }
 
-// The shared shell for /privacy and /terms: the same logo header and footer as the
-// landing page, wrapped around a single Portable Text document. The footer tagline
-// falls back to the static copy here (no CMS fetch) since these pages only need its links.
 export function LegalPage({
   doc,
   supportEmail,

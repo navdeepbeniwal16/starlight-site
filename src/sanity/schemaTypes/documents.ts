@@ -84,9 +84,7 @@ export const siteSettings = defineType({
   preview: { prepare: () => ({ title: "Site Settings" }) },
 });
 
-// The legal carve-out to the one-page site: /privacy and /terms each render one of
-// these. Both documents live on a single singleton so editors find all the legal
-// copy in one place in the desk.
+// The legal carve-out to the one-page site: /privacy and /terms each render one of these.
 export const legal = defineType({
   name: "legal",
   title: "Legal",

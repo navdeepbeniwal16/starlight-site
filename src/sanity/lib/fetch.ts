@@ -17,7 +17,7 @@ async function fetchFromSanity<T>(query: string): Promise<T> {
   return client.fetch<T>(query);
 }
 
-// Both return null when Sanity isn't configured (local/CI, or before the project
+// Each returns null when Sanity isn't configured (local/CI, or before the project
 // is wired up), so callers fall back to static copy instead of failing.
 export async function getLandingPage(): Promise<LandingPage | null> {
   if (!isSanityConfigured) return null;

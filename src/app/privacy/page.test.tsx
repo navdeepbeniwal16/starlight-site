@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { legalFallback } from "@/lib/legal";
 import type { Legal } from "@/sanity/lib/types";
 
-// Mock the typed fetch layer so the route is exercised against known content without a
-// live Sanity project, mirroring the home-page CMS test.
+// Mock the typed fetch layer so the route renders known content without a live Sanity project.
 const { getLegal, getSiteSettings } = vi.hoisted(() => ({
   getLegal: vi.fn(),
   getSiteSettings: vi.fn().mockResolvedValue(null),
@@ -57,7 +56,6 @@ describe("Privacy page", () => {
         name: legalFallback.privacy.title,
       }),
     ).toBeInTheDocument();
-    // The four processors the ticket requires the note to disclose.
     for (const processor of ["Neon", "HubSpot", "PostHog", "Vercel"]) {
       expect(text).toContain(processor);
     }

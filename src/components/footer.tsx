@@ -12,7 +12,6 @@ export function Footer({
   const tagline = content?.tagline ?? siteConfig.footer.tagline;
   const support = supportEmail ?? siteConfig.footer.supportEmail;
 
-  // Privacy and Terms resolve to the in-app legal routes; Support and the build link go off-site.
   const links = [
     { label: "Support", href: `mailto:${support}`, external: true },
     { label: "Privacy", href: "/privacy", external: false },

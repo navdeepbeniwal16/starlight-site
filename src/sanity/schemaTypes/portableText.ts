@@ -1,6 +1,5 @@
 import { defineArrayMember, defineField } from "sanity";
 
-// Links are the one annotation both the minimal and legal variants share.
 const linkAnnotation = defineArrayMember({
   name: "link",
   type: "object",

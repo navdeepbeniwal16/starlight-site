@@ -340,8 +340,6 @@ export const footer = defineType({
   ],
 });
 
-// One shape for both the privacy note and the terms, used twice inside the `legal`
-// singleton. `updatedAt` surfaces the "last updated" line the routes render.
 export const legalDocument = defineType({
   name: "legalDocument",
   title: "Legal document",
