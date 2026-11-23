@@ -28,6 +28,13 @@ model Signup {
   consentAt    DateTime? @map("consent_at")
   syncedAt     DateTime? @map("synced_at")
   syncAttempts Int       @default(0) @map("sync_attempts")
+  // First-touch UTM, captured client-side and posted with the form. Nullable: direct
+  // traffic and pre-analytics rows carry none.
+  utmSource    String?   @map("utm_source")
+  utmMedium    String?   @map("utm_medium")
+  utmCampaign  String?   @map("utm_campaign")
+  utmTerm      String?   @map("utm_term")
+  utmContent   String?   @map("utm_content")
 
   @@unique([email, segment])
   @@map("signup")
