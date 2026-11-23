@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import type { Segment } from "@/generated/prisma/enums";
 import {
   captureCtaClick,
@@ -61,11 +61,20 @@ export function SignupFormClient({
   const honeypotId = `${id}-${HONEYPOT_FIELD}`;
   const location = source ?? id;
 
-  // Resolved once on mount (sessionStorage/URL) rather than during render, so the hidden
-  // fields match between the server shell and first client render — then fill in afterwards.
-  const [utm, setUtm] = useState<Utm>({});
+  // First-touch UTM lives in refs, not state: resolved once on mount and written straight
+  // into the hidden fields and the identify call. No re-render, and the server-rendered empty
+  // fields never mismatch on hydration.
+  const formRef = useRef<HTMLFormElement>(null);
+  const utmRef = useRef<Utm>({});
   useEffect(() => {
-    setUtm(captureFirstTouchUtm());
+    const utm = captureFirstTouchUtm();
+    utmRef.current = utm;
+    const form = formRef.current;
+    if (!form) return;
+    for (const key of UTM_KEYS) {
+      const field = form.elements.namedItem(key);
+      if (field instanceof HTMLInputElement) field.value = utm[key] ?? "";
+    }
   }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -81,24 +90,25 @@ export function SignupFormClient({
     const consented = consent instanceof HTMLInputElement && consent.checked;
     const value = email instanceof HTMLInputElement ? email.value : "";
     if (consented && value) {
-      identifySignup(value, segment, utm);
+      identifySignup(value, segment, utmRef.current);
     }
     // Native POST proceeds; PostHog drains the queued events on pagehide via sendBeacon.
   }
 
   return (
     <form
+      ref={formRef}
       method="post"
       action="/api/signup"
       onSubmit={handleSubmit}
       className="flex w-full flex-col gap-3"
     >
       {source ? <input type="hidden" name="source" value={source} /> : null}
-      {UTM_KEYS.map((key) =>
-        utm[key] ? (
-          <input key={key} type="hidden" name={key} value={utm[key]} />
-        ) : null,
-      )}
+      {/* Empty on the server and first render; the mount effect fills them from first-touch
+          UTM. The route ignores blank values, so direct traffic posts no UTM. */}
+      {UTM_KEYS.map((key) => (
+        <input key={key} type="hidden" name={key} defaultValue="" />
+      ))}
       {/* Honeypot: a decoy the markup hides from humans and assistive tech but a bot
           fills. Deliberately a real text input — type=hidden would tip off the bot. */}
       <div

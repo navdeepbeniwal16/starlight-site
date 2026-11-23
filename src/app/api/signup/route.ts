@@ -3,6 +3,7 @@ import { Segment } from "@/generated/prisma/enums";
 import {
   flushAnalytics,
   trackSignupCommitted,
+  trackSignupError,
   trackTestflightRedirect,
 } from "@/lib/analytics/signup-events";
 import { readUtmFromForm } from "@/lib/analytics/utm";
@@ -103,6 +104,8 @@ export async function POST(request: Request): Promise<Response> {
     created = count === 1;
   } catch (error) {
     console.error("signup write failed", error);
+    trackSignupError(error, { email, segment });
+    after(() => flushAnalytics());
     return redirect(`/?status=${SIGNUP_STATUS.error}`, request.url);
   }
 

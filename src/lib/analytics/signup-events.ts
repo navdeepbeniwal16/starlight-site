@@ -37,6 +37,19 @@ export function trackTestflightRedirect(ctx: ServerEventContext): void {
   send(ANALYTICS_EVENTS.testflightRedirect, ctx);
 }
 
+// Reports a signup write failure to PostHog error tracking — the signup API is the path the
+// ticket calls out explicitly. Personless: a failed write must not mint a profile.
+export function trackSignupError(
+  error: unknown,
+  ctx: Pick<ServerEventContext, "email" | "segment">,
+): void {
+  analytics.captureException(error, {
+    distinctId: ctx.email,
+    properties: { segment: ctx.segment, scope: "signup_write" },
+    options: { process_person_profile: false },
+  });
+}
+
 // Serverless has no background flush timer (see posthog-server), so the route drains the
 // queued events in after(), past the sent response.
 export function flushAnalytics(): Promise<void> {
