@@ -30,3 +30,10 @@ export const siteSettingsQuery = defineQuery(`*[_type == "siteSettings"][0]{
   supportEmail,
   testFlightUrl
 }`);
+
+// The /privacy and /terms routes read one `legalDocument` each off the singleton.
+const LEGAL_DOCUMENT = `{ title, updatedAt, body }`;
+export const legalQuery = defineQuery(`*[_type == "legal"][0]{
+  privacy${LEGAL_DOCUMENT},
+  terms${LEGAL_DOCUMENT}
+}`);
