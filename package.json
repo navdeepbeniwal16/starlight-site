@@ -23,6 +23,8 @@
     "@vercel/speed-insights": "^2.1.0",
     "next": "16.4.6",
     "next-sanity": "^13.5.1",
+    "posthog-js": "^1.453.3",
+    "posthog-node": "^6.0.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "sanity": "^6.24.0",
