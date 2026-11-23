@@ -27,7 +27,7 @@ test("waitlist signup succeeds, and a repeat shows already-on-list", async ({
 
   await expect(page).toHaveURL(/status=joined/);
   await expect(
-    page.locator("#notify").getByText(/you're on the list/i),
+    page.locator("#notify").getByText(/you're in/i),
   ).toBeVisible();
 
   const repeat = page.locator("#notify");
@@ -36,7 +36,7 @@ test("waitlist signup succeeds, and a repeat shows already-on-list", async ({
 
   await expect(page).toHaveURL(/status=already/);
   await expect(
-    page.locator("#notify").getByText(/already on the list/i),
+    page.locator("#notify").getByText(/you're already in/i),
   ).toBeVisible();
 });
 
