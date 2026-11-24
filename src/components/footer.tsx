@@ -12,7 +12,6 @@ export function Footer({
   const tagline = content?.tagline ?? siteConfig.footer.tagline;
   const support = supportEmail ?? siteConfig.footer.supportEmail;
 
-  // The /privacy and /terms routes don't exist yet; the links are wired ahead of them.
   const links = [
     { label: "Support", href: `mailto:${support}`, external: true },
     { label: "Privacy", href: "/privacy", external: false },

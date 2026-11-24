@@ -1,10 +1,11 @@
 import type { StructureResolver } from "sanity/structure";
 
-// The two singletons, pinned in the desk. Everything else in the model is an object
-// nested inside these, so these are the only top-level documents an editor opens.
+// The singletons pinned in the desk. Everything else in the model is an object nested
+// inside these, so these are the only top-level documents an editor opens.
 export const SINGLETONS = [
   { id: "siteSettings", title: "Site Settings", schemaType: "siteSettings" },
   { id: "landingPage", title: "Landing Page", schemaType: "landingPage" },
+  { id: "legal", title: "Legal", schemaType: "legal" },
 ] as const;
 
 export const singletonTypes = new Set<string>(SINGLETONS.map((s) => s.schemaType));

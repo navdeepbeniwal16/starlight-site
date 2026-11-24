@@ -178,6 +178,27 @@ media, and the TestFlight link with no deploy.
 - **`testFlightUrl`** lives once in `siteSettings`; the `TESTFLIGHT_URL` env var is only
   the fallback for when Sanity isn't configured.
 
+## Privacy & terms
+
+`/privacy` and `/terms` are the legal carve-out to the one-page site — two thin static
+routes that render Portable Text rather than marketing sections. A third pinned
+singleton, `legal`, holds both documents (`privacy` and `terms`, each a title, a
+last-updated date, and a richer Portable Text body that allows headings and lists),
+edited in the same Studio.
+
+- **Same fetch posture** — `getLegal()` reads the singleton through the typed layer and
+  is cached under the shared `sanity:content` tag, so a publish already revalidates both
+  routes. It returns `null` when Sanity isn't configured.
+- **No static fallback** — unlike the marketing sections, there is deliberately no
+  hand-coded copy to fall back to: a stale privacy or terms policy is worse than none, so
+  when the document is missing the route renders an "isn't available" message instead.
+  The live copy is authored and published in Studio.
+- **What the privacy note should disclose** — what's collected (email, which list,
+  first-touch UTM, consent timestamp, country, anonymous events), the four processors
+  (Neon, HubSpot, PostHog, Vercel), cookieless tracking, consent as the lawful basis, the
+  TestFlight handoff to Apple, unsubscribe and delete rights, no data sale, and retention.
+- **Footer** — the footer's Privacy and Terms links resolve to these routes.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs five jobs on every pull request (and on pushes to

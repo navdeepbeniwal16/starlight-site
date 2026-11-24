@@ -105,3 +105,15 @@ export interface SiteSettings {
   supportEmail: string | null;
   testFlightUrl: string | null;
 }
+
+export interface LegalDocument {
+  title: string;
+  // ISO date (yyyy-mm-dd) from Sanity's `date` type.
+  updatedAt: string;
+  body: PortableTextBlock[];
+}
+
+export interface Legal {
+  privacy: LegalDocument;
+  terms: LegalDocument;
+}

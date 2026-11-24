@@ -83,3 +83,25 @@ export const siteSettings = defineType({
   ],
   preview: { prepare: () => ({ title: "Site Settings" }) },
 });
+
+// The legal carve-out to the one-page site: /privacy and /terms each render one of these.
+export const legal = defineType({
+  name: "legal",
+  title: "Legal",
+  type: "document",
+  fields: [
+    defineField({
+      name: "privacy",
+      title: "Privacy",
+      type: "legalDocument",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "terms",
+      title: "Terms",
+      type: "legalDocument",
+      validation: (rule) => rule.required(),
+    }),
+  ],
+  preview: { prepare: () => ({ title: "Legal" }) },
+});

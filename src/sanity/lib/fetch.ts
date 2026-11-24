@@ -1,8 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { isSanityConfigured } from "../env";
 import { client } from "./client";
-import { landingPageQuery, siteSettingsQuery } from "./queries";
-import type { LandingPage, SiteSettings } from "./types";
+import { landingPageQuery, legalQuery, siteSettingsQuery } from "./queries";
+import type { Legal, LandingPage, SiteSettings } from "./types";
 
 // One tag for the whole CMS: a two-singleton site has no reason to revalidate
 // pieces separately, so the publish webhook invalidates everything at once.
@@ -17,7 +17,7 @@ async function fetchFromSanity<T>(query: string): Promise<T> {
   return client.fetch<T>(query);
 }
 
-// Both return null when Sanity isn't configured (local/CI, or before the project
+// Each returns null when Sanity isn't configured (local/CI, or before the project
 // is wired up), so callers fall back to static copy instead of failing.
 export async function getLandingPage(): Promise<LandingPage | null> {
   if (!isSanityConfigured) return null;
@@ -27,4 +27,9 @@ export async function getLandingPage(): Promise<LandingPage | null> {
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   if (!isSanityConfigured) return null;
   return fetchFromSanity<SiteSettings | null>(siteSettingsQuery);
+}
+
+export async function getLegal(): Promise<Legal | null> {
+  if (!isSanityConfigured) return null;
+  return fetchFromSanity<Legal | null>(legalQuery);
 }

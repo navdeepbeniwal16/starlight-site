@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { minimalPortableText } from "./portableText";
+import { legalPortableText, minimalPortableText } from "./portableText";
 
 // Reused building blocks ------------------------------------------------------
 
@@ -338,4 +338,25 @@ export const footer = defineType({
       validation: (rule) => rule.max(120).warning("Keep the tagline short."),
     }),
   ],
+});
+
+export const legalDocument = defineType({
+  name: "legalDocument",
+  title: "Legal document",
+  type: "object",
+  fields: [
+    defineField({
+      name: "title",
+      type: "string",
+      validation: (rule) => rule.required().max(60).warning("Keep the title short."),
+    }),
+    defineField({
+      name: "updatedAt",
+      title: "Last updated",
+      type: "date",
+      validation: (rule) => rule.required(),
+    }),
+    legalPortableText("body", "Body", { required: true }),
+  ],
+  preview: { select: { title: "title", subtitle: "updatedAt" } },
 });
