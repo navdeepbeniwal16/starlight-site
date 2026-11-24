@@ -1,242 +1,209 @@
-# Starlight
+<h1 align="center">Starlight launch site</h1>
+ 
+<p align="center">
+  Check out the website here → <a href="https://www.trystarlight.app">www.trystarlight.app</a>
+</p>
 
-Marketing + beta-waitlist site for Starlight. Built on Next.js (App Router) with a
-merge-gating CI pipeline and deploy-on-green via Vercel.
+<p align="center">
+  The launch site for <strong>Starlight</strong>, an AI day planner for days that don't come
+  with a schedule.
+</p>
 
-## Stack
+Starlight is an AI day planner for freelancers, people running their own business, and anyone
+else who sets their own hours. When nobody sets your day for you, every morning starts with a
+long list and the same question: what's actually worth doing today? Starlight does that sorting
+the way a good assistant would. You put everything on your plate in one place and tell it how
+you like your day to run. It suggests a plan that fits, and you make the call.
+ 
+This repo is the launch website for Starlight. It's one page that explains what Starlight is and
+gives you two ways in. You can try the iOS beta today through TestFlight, or join the waitlist
+for launch.
+ 
+This project is also my attempt to get hands-on with wiring a CMS, a CRM and an analytics tool
+together. Starlight needed a marketing website, so I thought it could be a good chance to try it
+on something real while keeping the scope small.
+ 
+The core of it is signups. Each one is saved to Postgres before anything else happens, so if the
+CRM (HubSpot) is slow or down, or a lot of people sign up at once, the signup is still safe.
 
-- **Next.js 16** (App Router) + **React 19**, **TypeScript** (strict)
-- **Tailwind CSS v4**
-- **Prisma 7** (Postgres, driver adapters) — the `signup` system-of-record + migrations
-- **HubSpot** — best-effort CRM sync behind a swappable client (no-op when unconfigured)
-- **Sanity** — structured-singleton CMS for the landing page, with Studio at `/studio`
-- **Vitest** + Testing Library (unit) and **Playwright** (E2E)
-- **Vercel** hosting + Speed Insights + Cron
-- **PostHog** (EU cloud) — cookieless analytics, conversion funnels, runtime error tracking
-
+<p align="center">
+  <a href="https://github.com/navdeepbeniwal16/starlight">The Starlight app Github repo</a>
+</p>
+ 
+## How it's built
+ 
+I've built the site with an agentic coding workflow. I've made the calls on the architecture, the
+data model, the API contracts and the overall design of each feature, and Claude Code has taken
+care of the implementation. Every change has been checked against its ticket and covered by unit,
+integration and end-to-end tests, which CI runs on every pull request and every push to `main`.
+ 
+Before any code was written, I had listed the open questions in a
+[`/wayfinder` issue](https://github.com/navdeepbeniwal16/starlight-site/issues/1) and worked
+through each one in its own ticket: signup reliability, abuse defense, the content model,
+analytics and privacy, and operations. All the decisions had then been compiled into one PRD,
+published as the
+[Launch Site v1 milestone](https://github.com/navdeepbeniwal16/starlight-site/milestone/1),
+which became the build tickets.
+ 
+Every ticket has gone through the same steps:
+ 
+- It's had a spec first (the problem, the scope and the acceptance criteria), and it's only been
+  picked up once that spec was ready.
+- Each issue has had its own short-lived branch and one pull request that links back to it.
+- Each pull request has been reviewed against the repo's standards and the ticket's spec, with
+  CI running on every push.
+- Every merge to `main` has deployed to Vercel automatically.
+## Architecture
+ 
+It's a Next.js app hosted on Vercel. The content copy comes from Sanity and analytics run on
+PostHog. Signups are saved in Neon Postgres first for reliability and then copied over to a CRM
+(HubSpot, in this case), with a daily cron job retrying any entries that didn't make it.
+ 
+### Stack
+ 
+| Area | Technologies |
+|---|---|
+| Framework and hosting | Next.js 16 (App Router), React 19, TypeScript (strict), Vercel |
+| Styling | Tailwind CSS v4, styled-components, Fraunces, Inter and Caprasimo |
+| Content (CMS) | Sanity, as one structured document, with the Studio built in at `/studio` |
+| Source of truth | Neon Postgres, Prisma 7 (`@prisma/adapter-pg`) |
+| CRM | HubSpot, best-effort, upserted by email, behind a swappable client |
+| Analytics | PostHog (US cloud, no cookies) and Vercel Speed Insights |
+| Testing | Vitest and Testing Library (unit, integration), Playwright (end to end) |
+| CI/CD | GitHub Actions (five jobs), Vercel deploys when they pass |
+ 
+### System
+ 
+```mermaid
+flowchart LR
+    visitor(["Visitor"])
+ 
+    subgraph vercel["Next.js on Vercel"]
+        page["Landing page<br/>App Router + ISR"]
+        signup["Signup route<br/>saves first"]
+    end
+ 
+    sanity["Sanity<br/>CMS"]
+    db[("Neon Postgres<br/>source of truth")]
+    hubspot["HubSpot<br/>CRM"]
+    posthog["PostHog<br/>analytics · US"]
+ 
+    visitor -->|browse| page
+    visitor -->|submit| signup
+    sanity -->|"copy + media (ISR)"| page
+    signup -->|"commit (await)"| db
+    signup -.->|best-effort| hubspot
+    page -->|events| posthog
+    signup -->|signup_committed| posthog
+```
+ 
+When someone visits, the App Router builds the page from the copy and media stored in Sanity,
+using ISR. Publishing in Sanity fires a webhook that refreshes the page, so content changes go
+live without a deploy.
+ 
+When someone signs up, the request goes to a route handler that saves the row to Postgres and
+responds straight away. HubSpot and the browser's analytics both run asynchronously, so they
+can't slow the user down or break the signup. PostHog records the signup on the server after it's
+saved, so the funnel numbers match the database.
+ 
+### How a signup works
+ 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Visitor
+    participant R as Signup route
+    participant DB as Neon Postgres
+    participant H as HubSpot
+    participant P as PostHog
+ 
+    U->>R: POST signup (email, segment)
+    R->>R: validate email · check bot traps
+    R->>DB: upsert (email, segment)
+    DB-->>R: committed
+    R-->>U: success · beta gets a 303 to TestFlight
+    R->>P: signup_committed (server-side)
+    R-)H: upsert contact, best-effort, via after()
+    Note over R,H: a failed sync leaves synced_at = null<br/>and a daily cron retries unsynced rows
+```
+ 
+The route checks the email, checks the bot traps and upserts the row into Postgres. Once that's
+committed, the signup is safe, and only then does the route respond. Beta signups get a `303`
+redirect to TestFlight.
+ 
+The HubSpot upsert runs after the response, using Next's
+[`after()`](https://nextjs.org/docs/app/api-reference/functions/after), so a slow or failing CRM
+doesn't hold anyone up. If the sync fails, `synced_at` stays null and a daily Vercel cron
+retries every unsynced row. `POST /api/resync` does the same thing by hand.
+ 
+`(email, segment)` is unique, so submitting twice just shows "already on the list", and the same
+person can join both the beta and the waitlist.
+ 
+### What else is wired in
+ 
+- **Content.** The landing page is one structured document in Sanity, not a page builder. The
+  code decides which sections exist and in what order, and Sanity holds the copy and media
+  inside them. You edit it in the Studio at `/studio`, and every image needs alt text.
+- **Analytics and privacy.** PostHog runs without cookies, so the site doesn't need a consent
+  banner. A handful of events feed two conversion funnels, one for the beta and one for the
+  waitlist.
+- **Abuse defense.** A hidden honeypot field and an HMAC-signed time check catch most bots. When
+  a bot trips one, it sees a normal success message, but nothing is saved. Both are tuned so
+  real people, including screen reader users, don't set them off.
 ## Getting started
-
+ 
 ```bash
-npm install           # postinstall runs `prisma generate`
-cp .env.example .env   # set DATABASE_URL (Postgres), TESTFLIGHT_URL, SIGNUP_FORM_SECRET
-                       # DIRECT_URL is optional locally (falls back to DATABASE_URL)
-                       # Sanity vars are optional locally (site uses static copy)
+npm install            # postinstall runs `prisma generate`
+cp .env.example .env   # set DATABASE_URL (Postgres) and SIGNUP_FORM_SECRET
 npm run dev            # http://localhost:3000
 ```
-
+ 
+Sanity, HubSpot and PostHog are all optional locally. Without them, the site uses its built-in
+fallback copy and the integrations do nothing, so a Postgres URL is all you need.
+ 
+## Environment variables
+ 
+Every variable is documented in [`.env.example`](.env.example).
+ 
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Pooled Postgres connection for the app. **Required.** |
+| `DIRECT_URL` | Direct (unpooled) connection for migrations. Optional locally, falls back to `DATABASE_URL`. |
+| `SIGNUP_FORM_SECRET` | HMAC secret for each form's time check. The signup route won't accept submissions without it. |
+| `TESTFLIGHT_URL` | Backup beta redirect URL. The main one lives in Sanity, in `siteSettings.testFlightUrl`. |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Sanity project ID. If unset, the site uses its fallback copy. |
+| `SANITY_REVALIDATE_SECRET` | Shared secret for the publish webhook (`POST /api/revalidate`). |
+| `HUBSPOT_ACCESS_TOKEN` | CRM token, plus a list ID for each segment. If unset, nothing is sent to HubSpot. |
+| `CRON_SECRET` | Bearer token that protects the cron job and `/api/resync`. |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project key (US cloud). If unset, analytics are off. |
+ 
 ## Scripts
-
-| Script              | What it does                                        |
-| ------------------- | --------------------------------------------------- |
-| `npm run dev`       | Start the dev server                                |
-| `npm run build`     | Apply pending migrations (if a DB is set), then build |
-| `npm start`         | Serve the production build                           |
-| `npm run lint`      | ESLint                                              |
-| `npm run typecheck` | Generate route types, then `tsc --noEmit`           |
-| `npm run test`      | Vitest unit tests                                   |
-| `npm run test:integration` | Vitest integration tests (needs Postgres via `DATABASE_URL`) |
-| `npm run test:e2e`  | Playwright E2E (builds + serves, then smokes `/`)   |
-
-## Database connections
-
-The app uses **two** Postgres connection strings, by design — keep both:
-
-- **`DATABASE_URL` (pooled)** — the runtime connection for serverless functions.
-  Many short-lived function invocations share a small pool, so this points at the
-  pooler (on Neon, the `-pooler` host). Used by the Prisma driver adapter in
-  `src/lib/db.ts`.
-- **`DIRECT_URL` (direct/unpooled)** — the migration connection. `prisma migrate
-  deploy` issues DDL, which a pooler like PgBouncer can't carry, so it needs a
-  direct connection. Used by `prisma7.config.ts`, which also reads
-  `DATABASE_URL_UNPOOLED` — the name the Neon–Vercel integration injects for the
-  direct connection (including on each preview branch).
-
-Locally and in CI there's no pooler, so `DIRECT_URL` can be left unset — migrations
-fall back to `DATABASE_URL`. In production each must point at its matching host.
-
-## HubSpot sync & reconciliation
-
-The durable `signup` write is the source of truth; the CRM sync is best-effort and
-downstream of it. A swappable client (`src/lib/hubspot`) talks to HubSpot only when
-`HUBSPOT_ACCESS_TOKEN` is set — otherwise a no-op fake stands in, so local, CI, and
-unconfigured deploys never make a real call (and tests always use a fake).
-
-- **Write path** — after a signup commits, the route upserts the contact off the
-  response via Next's [`after()`](https://nextjs.org/docs/app/api-reference/functions/after).
-  A HubSpot failure never fails the user's signup; the row just persists with
-  `synced_at = null`. Upsert-by-email keeps every attempt idempotent.
-- **Cron sweep** — `vercel.json` schedules `/api/cron/sync` once daily (the Vercel
-  Hobby plan caps crons at one run per day; a shorter interval needs Pro) to re-upsert
-  `synced_at IS NULL` rows, stamping `synced_at` on success and incrementing
-  `sync_attempts` on failure. A **soft cap** (`HUBSPOT_SYNC_MAX_ATTEMPTS`, default 5)
-  stops auto-retrying a row that keeps failing, leaving it for inspection.
-- **Manual recovery** — `POST /api/resync` re-runs the same reconciliation on demand,
-  the escape hatch when a failed sync shouldn't wait for the daily sweep.
-
-Both endpoints are protected by the `CRON_SECRET` bearer token (Vercel injects it on
-cron invocations). Set `HUBSPOT_*` and `CRON_SECRET` in the Vercel project env vars.
-
-## Signup abuse protection
-
-Both signup forms carry proportionate, zero-friction bot defense (`src/lib/signup/abuse.ts`),
-tuned to never trip a real user — including one on assistive tech:
-
-- **Honeypot** — an off-screen, `aria-hidden` text input (never `type=hidden`) that
-  humans and screen readers skip but a form-filling bot populates.
-- **Time-trap** — each form renders an HMAC-signed timestamp (signed per request with
-  `SIGNUP_FORM_SECRET`, so the field sits outside the page's static shell). The route
-  rejects a submission with a bad/missing signature, one submitted faster than a human
-  could fill the form, or one whose token has gone stale.
-
-A tripped guard returns a **silent fake-success** — the same response a real signup
-gets — and writes no row, so a bot can't tell it was dropped. An email-syntax error
-still surfaces inline. Set `SIGNUP_FORM_SECRET` (any high-entropy string, stable across
-instances) in the Vercel project env vars.
-
-## Analytics & conversion funnels (PostHog)
-
-Instrumentation runs on **PostHog EU cloud**, cookieless by default. The browser SDK uses
-in-memory persistence — no cookies, no local/session storage for identity — so an anonymous
-visitor's `distinct_id` lives only for the current page load and never persists across
-sessions, which is why the site needs **no consent banner**. Autocapture, session replay, and
-surveys are all off; the five manual events below are the entire surface. Everything stands
-down when `NEXT_PUBLIC_POSTHOG_KEY` is unset (local, CI, unconfigured deploys): the client SDK
-never initializes and the server client is a no-op fake — the same posture as the HubSpot
-client — so nothing reaches PostHog unless it's deliberately configured.
-
-### Events
-
-| Event                 | Side   | Fires when                                        | Props                   |
-| --------------------- | ------ | ------------------------------------------------- | ----------------------- |
-| `$pageview`           | client | each page load / client-side route change         | —                       |
-| `cta_click`           | client | a signup CTA button is clicked                     | `cta` (segment), `location` |
-| `signup_submitted`    | client | a form passes browser validation and submits       | `segment`               |
-| `signup_committed`    | server | a **new** signup row commits to Postgres           | `segment`, `country?`   |
-| `testflight_redirect` | server | a beta signup is 303'd to TestFlight               | `segment`, `country?`   |
-
-`signup_committed` fires once per newly-created row (never on a duplicate submit, never for a
-tripped bot), so its per-segment count equals the `signup` table. Both server events are keyed
-by the normalized email as `distinct_id` — the same key the client identify uses — so they land
-on one person.
-
-### Identity, consent, and merging
-
-A visitor stays anonymous until a **consented** submit calls `identify()` with the raw
-(normalized) email as `distinct_id` and person properties: the segment flag
-(`launch_waitlist` / `beta_tester`), first-touch UTM (set-once), and `consent_at`. PostHog
-merges the anonymous pre-submit events into that person on identify. An **unticked** consent
-box still stores the signup and still fires `signup_committed`, but with person processing off
-(`$process_person_profile: false`) — no profile is created and no email is attached to a person.
-
-### What's captured, and what isn't
-
-- **UTM** — first-touch UTM is read client-side (kept in `sessionStorage`, not a cookie, so a
-  mid-funnel redirect that strips the query string — e.g. `?status=invalid` — doesn't lose it),
-  posted on the form, and **persisted to the signup row** (`utm_*` columns). It also rides on
-  the consented identify as set-once person props.
-- **Geo** — country only. Vercel resolves the edge IP to an ISO code (`x-vercel-ip-country`)
-  that rides on the server events as `country`; the raw IP is never read or stored, and
-  PostHog's own GeoIP enrichment is disabled server-side.
-- **No referrer, no fingerprint, no cookies** — referrer properties sit in the SDK denylist,
-  and ad-id URL params (gclid, fbclid, …) are masked out before anything leaves the browser.
-
-### Error tracking
-
-Runtime errors feed PostHog error tracking (this satisfies the Ops runtime-error monitoring
-requirement): the client SDK autocaptures unhandled exceptions (`capture_exceptions`), and
-`src/instrumentation.ts`'s `onRequestError` forwards every server error — the signup API
-included, which also reports its write failures explicitly from the route's catch.
-
-### Funnels (defined in the PostHog UI)
-
-Two funnels, both built from the events above:
-
-1. **Launch waitlist** — `$pageview` → `cta_click` → `signup_submitted` → `signup_committed`,
-   with the two signup steps filtered to `segment = launch_waitlist`.
-2. **Beta** — the same four steps filtered to `segment = beta_tester`, then a final
-   `testflight_redirect`.
-
-## Content (Sanity CMS)
-
-The landing page is a **structured singleton**, not a page builder: code owns which
-sections exist and their order (`src/sanity/schemaTypes`), Sanity owns the copy and
-media inside each. Two pinned singletons — `landingPage` and `siteSettings` — are
-edited in the embedded **Studio at `/studio`**, so an editor changes marketing copy,
-media, and the TestFlight link with no deploy.
-
-- **Typed fetch layer** (`src/sanity/lib`) — hand-written types mirror the GROQ
-  projections; `getLandingPage()` / `getSiteSettings()` are the only entry points.
-  Both **return `null` when Sanity isn't configured** (no `NEXT_PUBLIC_SANITY_PROJECT_ID`),
-  so local and CI builds fall back to the static copy in `src/lib/site.ts` instead of
-  failing — the same no-op posture as the HubSpot client.
-- **Validation** — every image requires alt text, display-critical strings carry soft
-  max-length warnings, and `howItWorks` must have 2–4 steps.
-- **ISR + webhook** — reads are cached (`use cache` + a long `cacheLife`) and tagged
-  `sanity:content`. Publishing fires a Sanity webhook to `POST /api/revalidate`, which
-  verifies the `SANITY_REVALIDATE_SECRET` HMAC signature and calls `revalidateTag`, so
-  the live page refreshes without a timer or a redeploy.
-- **`testFlightUrl`** lives once in `siteSettings`; the `TESTFLIGHT_URL` env var is only
-  the fallback for when Sanity isn't configured.
-
-## Privacy & terms
-
-`/privacy` and `/terms` are the legal carve-out to the one-page site — two thin static
-routes that render Portable Text rather than marketing sections. A third pinned
-singleton, `legal`, holds both documents (`privacy` and `terms`, each a title, a
-last-updated date, and a richer Portable Text body that allows headings and lists),
-edited in the same Studio.
-
-- **Same fetch posture** — `getLegal()` reads the singleton through the typed layer and
-  is cached under the shared `sanity:content` tag, so a publish already revalidates both
-  routes. It returns `null` when Sanity isn't configured.
-- **No static fallback** — unlike the marketing sections, there is deliberately no
-  hand-coded copy to fall back to: a stale privacy or terms policy is worse than none, so
-  when the document is missing the route renders an "isn't available" message instead.
-  The live copy is authored and published in Studio.
-- **What the privacy note should disclose** — what's collected (email, which list,
-  first-touch UTM, consent timestamp, country, anonymous events), the four processors
-  (Neon, HubSpot, PostHog, Vercel), cookieless tracking, consent as the lawful basis, the
-  TestFlight handoff to Apple, unsubscribe and delete rights, no data sale, and retention.
-- **Footer** — the footer's Privacy and Terms links resolve to these routes.
-
-## Continuous integration
-
-`.github/workflows/ci.yml` runs five jobs on every pull request (and on pushes to
-`main`): **lint**, **typecheck**, **unit**, **integration** (signup route handler
-against an ephemeral Postgres service container), and **e2e**. `main` is
-branch-protected so a red run blocks merge.
-
+| Script | What it does |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Run pending migrations (if a database is set), then `next build` |
+| `npm start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Generate route types, then `tsc --noEmit` |
+| `npm run test` | Vitest unit tests |
+| `npm run test:integration` | Integration tests (needs Postgres via `DATABASE_URL`) |
+| `npm run test:e2e` | Playwright end-to-end tests |
+ 
 ## Deployment
-
-Vercel's GitHub integration builds a **preview deploy per pull request** and
-**auto-deploys production on merge to `main`**. [Speed Insights](https://vercel.com/docs/speed-insights)
-is mounted in the root layout.
-
-**Deploys self-migrate.** `npm run build` runs `prisma migrate deploy` (on the
-direct connection) before `next build`, so every deploy converges its database to
-the committed migrations. A build with no database configured — a local build, CI,
-or a fork's preview — skips the step and still succeeds.
-
-### One-time setup (dashboard, outside this repo)
-
-These steps need Vercel/GitHub account access and are not scripted here:
-
-1. **Link the repo in Vercel** — import `starlight-site`, framework preset "Next.js".
-   This enables PR preview URLs and production deploys on merge.
-2. **Set `DATABASE_URL`** (pooled), **`DIRECT_URL`** (direct/unpooled — see
-   [Database connections](#database-connections)), `TESTFLIGHT_URL`, `SIGNUP_FORM_SECRET`
-   (see [Signup abuse protection](#signup-abuse-protection)), the `HUBSPOT_*` vars,
-   `CRON_SECRET` (see [HubSpot sync](#hubspot-sync--reconciliation)), the
-   `NEXT_PUBLIC_SANITY_*` + `SANITY_REVALIDATE_SECRET` vars (see [Content](#content-sanity-cms)),
-   and the `NEXT_PUBLIC_POSTHOG_*` vars (see [Analytics](#analytics--conversion-funnels-posthog))
-   in the Vercel project env vars.
-3. **Create the Sanity project & publish webhook** — create a project with a
-   `production` dataset, set its id as `NEXT_PUBLIC_SANITY_PROJECT_ID`, and add a Sanity
-   webhook (on publish) that POSTs to `/api/revalidate` with the shared
-   `SANITY_REVALIDATE_SECRET`. See [Content](#content-sanity-cms).
-4. **Branch protection** — require the `lint`, `typecheck`, `unit`,
-   `integration`, and `e2e` checks on `main` (also configurable via `gh api`).
-5. **Create the PostHog project & funnels** — create an EU-cloud project, set its API key as
-   `NEXT_PUBLIC_POSTHOG_KEY`, and build the two conversion funnels in the UI (see
-   [Analytics](#analytics--conversion-funnels-posthog)). Error tracking and the events need no
-   dashboard setup beyond the key.
+ 
+Vercel's GitHub integration builds a preview for every pull request and deploys to production
+when something merges into `main`. `main` is protected by the CI checks, so a failing run can't
+ship, and there's no custom deploy code.
+ 
+Each deploy runs its own migrations. `npm run build` runs `prisma migrate deploy` on the direct
+connection before `next build`, so after every deploy the database matches the committed
+migrations. Builds without a database (local, CI, or a fork's preview) skip that step and still
+succeed.
+ 
+CI (`.github/workflows/ci.yml`) runs five jobs on every pull request and every push to `main`:
+**lint**, **type-check**, **unit**, **integration** (the signup route against a throwaway
+Postgres container) and **e2e**.
+ 
+A few things live in dashboards, not in this repo: the Vercel project link, the env vars above,
+the Sanity project and its publish webhook, the PostHog project and its two funnels, and branch
+protection on `main`.
