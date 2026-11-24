@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { legalFallback } from "@/lib/legal";
 import type { Legal } from "@/sanity/lib/types";
 
 const { getLegal, getSiteSettings } = vi.hoisted(() => ({
@@ -43,17 +42,14 @@ describe("Terms page", () => {
     expect(screen.getByText(/Last updated 1 February 2026/)).toBeInTheDocument();
   });
 
-  it("falls back to static copy covering the beta, TestFlight, and no-warranty stance", async () => {
+  it("shows an unavailable message, not stale copy, when the CMS returns nothing", async () => {
     getLegal.mockResolvedValue(null);
 
-    const { container } = render(await TermsPage());
-    const text = container.textContent ?? "";
+    render(await TermsPage());
 
     expect(
-      screen.getByRole("heading", { level: 1, name: legalFallback.terms.title }),
+      screen.getByRole("heading", { level: 1, name: "Terms" }),
     ).toBeInTheDocument();
-    expect(text).toContain("TestFlight");
-    expect(text).toContain("beta");
-    expect(text).toContain("as they are");
+    expect(screen.getByText(/isn't available right now/i)).toBeInTheDocument();
   });
 });

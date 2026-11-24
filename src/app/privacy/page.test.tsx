@@ -1,6 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { legalFallback } from "@/lib/legal";
 import type { Legal } from "@/sanity/lib/types";
 
 // Mock the typed fetch layer so the route renders known content without a live Sanity project.
@@ -44,26 +43,15 @@ describe("Privacy page", () => {
     expect(screen.getByText(/Last updated 15 January 2026/)).toBeInTheDocument();
   });
 
-  it("falls back to static copy disclosing the processors, consent, TestFlight, rights, and retention", async () => {
+  it("shows an unavailable message, not stale copy, when the CMS returns nothing", async () => {
     getLegal.mockResolvedValue(null);
 
-    const { container } = render(await PrivacyPage());
-    const text = container.textContent ?? "";
+    render(await PrivacyPage());
 
     expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: legalFallback.privacy.title,
-      }),
+      screen.getByRole("heading", { level: 1, name: "Privacy" }),
     ).toBeInTheDocument();
-    for (const processor of ["Neon", "HubSpot", "PostHog", "Vercel"]) {
-      expect(text).toContain(processor);
-    }
-    expect(text).toContain("consent");
-    expect(text).toContain("TestFlight");
-    expect(text.toLowerCase()).toContain("unsubscribe");
-    expect(text).toContain("sell your data");
-    expect(text).toContain("How long we keep it");
+    expect(screen.getByText(/isn't available right now/i)).toBeInTheDocument();
   });
 
   it("links the footer to the legal routes", async () => {
