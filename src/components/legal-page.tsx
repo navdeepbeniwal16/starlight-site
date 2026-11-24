@@ -1,4 +1,4 @@
-import type { LegalDocument } from "@/sanity/lib/types";
+import type { Footer as FooterContent, LegalDocument } from "@/sanity/lib/types";
 import { Footer } from "./footer";
 import { Logo } from "./logo";
 import { PortableText } from "./portable-text";
@@ -22,10 +22,12 @@ const UNAVAILABLE = "This page isn't available right now. Please check back soon
 export function LegalPage({
   title,
   doc,
+  footer,
   supportEmail,
 }: {
   title: string;
   doc: LegalDocument | null;
+  footer: FooterContent | null;
   supportEmail?: string | null;
 }) {
   return (
@@ -54,7 +56,7 @@ export function LegalPage({
           )}
         </article>
       </main>
-      <Footer content={null} supportEmail={supportEmail} />
+      <Footer content={footer} supportEmail={supportEmail} />
     </>
   );
 }

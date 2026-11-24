@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
-import { getLegal, getSiteSettings } from "@/sanity/lib/fetch";
+import { getLandingPage, getLegal, getSiteSettings } from "@/sanity/lib/fetch";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -11,11 +11,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TermsPage() {
-  const [legal, settings] = await Promise.all([getLegal(), getSiteSettings()]);
+  const [legal, page, settings] = await Promise.all([
+    getLegal(),
+    getLandingPage(),
+    getSiteSettings(),
+  ]);
   return (
     <LegalPage
       title="Terms"
       doc={legal?.terms ?? null}
+      footer={page?.footer ?? null}
       supportEmail={settings?.supportEmail}
     />
   );

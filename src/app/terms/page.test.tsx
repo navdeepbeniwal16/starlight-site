@@ -2,11 +2,16 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Legal } from "@/sanity/lib/types";
 
-const { getLegal, getSiteSettings } = vi.hoisted(() => ({
+const { getLegal, getLandingPage, getSiteSettings } = vi.hoisted(() => ({
   getLegal: vi.fn(),
+  getLandingPage: vi.fn().mockResolvedValue(null),
   getSiteSettings: vi.fn().mockResolvedValue(null),
 }));
-vi.mock("@/sanity/lib/fetch", () => ({ getLegal, getSiteSettings }));
+vi.mock("@/sanity/lib/fetch", () => ({
+  getLegal,
+  getLandingPage,
+  getSiteSettings,
+}));
 
 import TermsPage from "./page";
 
