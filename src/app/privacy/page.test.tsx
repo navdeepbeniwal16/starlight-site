@@ -1,13 +1,19 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Legal } from "@/sanity/lib/types";
+import { siteConfig } from "@/lib/site";
+import type { LandingPage, Legal } from "@/sanity/lib/types";
 
 // Mock the typed fetch layer so the route renders known content without a live Sanity project.
-const { getLegal, getSiteSettings } = vi.hoisted(() => ({
+const { getLegal, getLandingPage, getSiteSettings } = vi.hoisted(() => ({
   getLegal: vi.fn(),
+  getLandingPage: vi.fn().mockResolvedValue(null),
   getSiteSettings: vi.fn().mockResolvedValue(null),
 }));
-vi.mock("@/sanity/lib/fetch", () => ({ getLegal, getSiteSettings }));
+vi.mock("@/sanity/lib/fetch", () => ({
+  getLegal,
+  getLandingPage,
+  getSiteSettings,
+}));
 
 import PrivacyPage from "./page";
 
@@ -28,8 +34,15 @@ const sanityLegal: Legal = {
   terms: { title: "Terms", updatedAt: "2026-01-15", body: [] },
 };
 
+const landingPage: Pick<LandingPage, "footer"> = {
+  footer: { tagline: "A tagline edited in Sanity." },
+};
+
 describe("Privacy page", () => {
-  beforeEach(() => getLegal.mockReset());
+  beforeEach(() => {
+    getLegal.mockReset();
+    getLandingPage.mockReset();
+  });
 
   it("renders the privacy document fetched through the typed layer", async () => {
     getLegal.mockResolvedValue(sanityLegal);
@@ -67,5 +80,20 @@ describe("Privacy page", () => {
       "href",
       "/terms",
     );
+  });
+
+  it("renders the footer tagline from the CMS, not the static fallback", async () => {
+    getLegal.mockResolvedValue(null);
+    getLandingPage.mockResolvedValue(landingPage);
+
+    render(await PrivacyPage());
+    const footer = screen.getByRole("contentinfo");
+
+    expect(
+      within(footer).getByText(landingPage.footer!.tagline!),
+    ).toBeInTheDocument();
+    expect(
+      within(footer).queryByText(siteConfig.footer.tagline),
+    ).not.toBeInTheDocument();
   });
 });
